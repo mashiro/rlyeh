@@ -21,34 +21,52 @@ module Rlyeh
       end
     end
 
+    unless respond_to? :singleton_class
+      def singleton_class
+        class << self
+          self
+        end
+      end
+    end
+
+    private
+
     def _filter_callbacks
       @_filter_callbacks ||= {}
     end
-    private :_filter_callbacks
 
     def _run_filter_callbacks(name, types, *args, &block)
       named_filter_callbacks = _filter_callbacks[name] || {}
       types.each do |type|
         (named_filter_callbacks[type] || []).each do |callback|
-          callback.call(*args, &block)
+          callback.bind(self).call *args, &block
         end
       end
     end
-    private :_run_filter_callbacks
+
+    def _generate_filter_method(type, name, block)
+      method_name = "__filter_#{type}_#{name}"
+      singleton_class.instance_eval do
+        define_method method_name, &block
+        method = instance_method method_name
+        remove_method method_name
+        method
+      end
+    end
 
     def _insert_filter_callbacks(names, type, block, options = {})
       prepend = options[:prepend]
       names.each do |name|
+        callback = _generate_filter_method type, name, block
         named_filter_callbacks = (_filter_callbacks[:"#{name}"] ||= {})
         callbacks = (named_filter_callbacks[type] ||= [])
         if prepend
-          callbacks.unshift block
+          callbacks.unshift callback
         else
-          callbacks.push block
+          callbacks.push callback
         end
       end
     end
-    private :_insert_filter_callbacks
 
     def _remove_filter_callbacks(names, type, block)
       names.each do |name|
@@ -57,7 +75,8 @@ module Rlyeh
         callbacks.delete block
       end
     end
-    private :_remove_filter_callbacks
+
+    public
 
     [:before, :after, :around].each do |type|
       define_method(:"#{type}_filter") do |*names, &block|

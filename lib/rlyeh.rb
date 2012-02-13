@@ -12,6 +12,7 @@ module Rlyeh
   autoload :Dispatcher,  'rlyeh/dispatcher'
   autoload :Filter,      'rlyeh/filter'
 
+  require 'rlyeh/middlewares'
   require 'rlyeh/runner'
   include Rlyeh::Runner
 end

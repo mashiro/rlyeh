@@ -1,5 +1,5 @@
 module Rlyeh
-  module Middleware
+  module Middlewares
     class TypableMap
       def initialize(app)
         @app = app

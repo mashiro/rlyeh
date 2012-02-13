@@ -2,28 +2,26 @@ require 'rlyeh/filter'
 
 module Rlyeh
   class Session
-    include Rlyeh::Filter
-
-    attr_accessor :channel, :connections
+    attr_reader :channel, :connections
 
     def initialize
       @channel = EventMachine::Channel.new
-      @subscribers = {}
+      @connections = {}
     end
 
-    def attach(conn)
-      conn.attached self
+    def attach(connection)
+      connection.attached self
 
-      @subscribers[conn] = @channel.subscribe do |msg|
-        conn.send_data msg
+      @connections[connection] = @channel.subscribe do |msg|
+        connection.send_data msg
       end
     end
 
-    def detach(conn)
-      id = @subscribers.delete conn
+    def detach(connection)
+      id = @connections.delete connection
       @channel.unsubscribe id if id
 
-      conn.detached self
+      connection.detached self
     end
 
     def close
@@ -34,9 +32,10 @@ module Rlyeh
     end
 
     def empty?
-      @subscribes.empty?
+      @connections.empty?
     end
 
+    include Rlyeh::Filter
     define_filter :attach, :detach, :close, :send_data
   end
 end

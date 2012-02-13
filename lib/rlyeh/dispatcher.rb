@@ -39,7 +39,7 @@ module Rlyeh
     def trigger(name, *args, &block)
       callbacks = self.class.callbacks name
       callbacks.each do |callback|
-        callback.bind(self).call *args, &block
+        break unless callback.bind(self).call *args, &block
       end
     end
   end

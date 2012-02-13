@@ -1,18 +1,21 @@
 module Rlyeh
   class Environment < ::Hash
-    def method_missing(method_id, *args)
-      case method_id.to_s
-      when /^(.+)=$/
-        store $1.to_sym, args.first
-      when /^(.+)\?$/
-        key? $1.to_sym
-      else
-        unless key? method_id
-          store method_id, Environment.new
-        else
-          fetch method_id
-        end
-      end
+    def respond_to?(method_id, include_private = false)
+      super || respond_to_missing?(method_id, include_private)
+    end
+
+    def respond_to_missing?(method_name, include_private)
+      method_name = method_id.to_s
+      return true if method_name =~ /^(.+)=$/
+      return true if self.key? method_name
+      super
+    end
+
+    def method_missing(method_id, *args, &block)
+      method_name = method_id.to_s
+      return self[$1] = args.first if method_name =~ /^(.+)=$/
+      return self[method_name] if self.key? method_name
+      super method_id, *args, &block
     end
   end
 end

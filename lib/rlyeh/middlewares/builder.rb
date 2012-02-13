@@ -1,5 +1,5 @@
 module Rlyeh
-  module Middleware
+  module Middlewares
     class Builder
       def initialize(&block)
         @ins = []
@@ -12,6 +12,10 @@ module Rlyeh
 
       def use(middleware, *args, &block)
         @ins << lambda { |app| middleware.new(app, *args, &block) }
+      end
+
+      def use!(middleware, *args, &block)
+        @ins.unshift lambda { |app| middleware.new(app, *args, &block) }
       end
 
       def run(app)

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 $LOAD_PATH.unshift 'lib'
 require 'rlyeh'
+require 'logger'
 
 class MyMiddleware
   include Rlyeh::Dispatcher
@@ -21,6 +22,7 @@ class MyMiddleware
 end
 
 class MyApp < Rlyeh::Base
+  use Rlyeh::Middlewares::Logger, :level => Logger::DEBUG
   use MyMiddleware
 
   on :privmsg do |env|

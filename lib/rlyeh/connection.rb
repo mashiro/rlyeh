@@ -1,5 +1,6 @@
 require 'ircp'
 require 'rlyeh/environment'
+require 'rlyeh/filter'
 
 module Rlyeh
   class Connection < EventMachine::Connection
@@ -16,8 +17,7 @@ module Rlyeh
     end
 
     def post_init
-      @app = klass.new
-      #@app = @app_class.new self, options
+      @app = klass.new nil, @options
     end
 
     def unbind
@@ -26,30 +26,26 @@ module Rlyeh
 
     def receive_line(data)
       env = Rlyeh::Environment.new
+      env.data = data
+      env.server = @server
       env.connection = self
-      env.raw = data
 
-      begin
-        env.message = Ircp.parse data
-      rescue Ircp::ParseError => e
-        p e
-      else
-        @app.call env
-      end
+      @app.call env
     end
 
     def attached(session)
       @session = session
-      #@app.attached session
     end
 
-    def deatched(session)
-      #@app.detached session
+    def detached(session)
       @session = nil
     end
 
     def attached?
       !!@session
     end
+
+    include Rlyeh::Filter
+    define_filter :attached, :detached
   end
 end

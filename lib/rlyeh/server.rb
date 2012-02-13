@@ -4,19 +4,16 @@ require 'rlyeh/filter'
 
 module Rlyeh
   class Server
-    include Rlyeh::Filter
-
     attr_reader :options, :host, :port
-    attr_reader :app_class, :signature, :connections, :sessions
+    attr_reader :klass, :signature, :connections
 
     def initialize(*args)
       @options = Rlyeh::Utils.extract_options! args
       @host = @options.delete(:host) || "127.0.0.1"
       @port = @options.delete(:port) || 46667
-      @app_class = args.shift
+      @klass = args.shift
       @signature = nil
       @connections = []
-      @sessions = {}
     end
 
     def self.start(*args)
@@ -24,10 +21,11 @@ module Rlyeh
     end
 
     def start
-      args = [self, @app_class, options]
+      args = [self, @klass, options]
       @signature = EventMachine.start_server @host, @port, Rlyeh::Connection, *args do |connection|
         bind connection
       end
+      self
     end
 
     def stop
@@ -36,8 +34,8 @@ module Rlyeh
     end
 
     def bind(connection)
-      @connections.push connection
       puts 'bind'
+      @connections.push connection
     end
 
     def unbind(connection)
@@ -55,6 +53,7 @@ module Rlyeh
       puts 'unbind'
     end
 
+    include Rlyeh::Filter
     define_filter :start, :stop, :bind, :unbind
   end
 end

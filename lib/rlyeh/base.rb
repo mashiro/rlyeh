@@ -1,5 +1,6 @@
 require 'rlyeh/dispatcher'
-require 'rlyeh/middleware/builder'
+require 'rlyeh/middlewares/builder'
+require 'rlyeh/middlewares/parser'
 
 module Rlyeh
   class Base
@@ -23,10 +24,8 @@ module Rlyeh
 
       alias new! new unless method_defined? :new!
       def new(*args, &block)
-        build(Rlyeh::Middleware::Builder.new, *args, &block).to_app
+        build(Rlyeh::Middlewares::Builder.new, *args, &block).to_app
       end
-
-      private
 
       def build(builder, *args, &block)
         setup_default_middlewares builder
@@ -36,6 +35,7 @@ module Rlyeh
       end
 
       def setup_default_middlewares(builder)
+        builder.use! Rlyeh::Middlewares::Parser
       end
 
       def setup_middlewares(builder)
@@ -45,8 +45,9 @@ module Rlyeh
       end
     end
 
-    def initialize(app = nil)
+    def initialize(app = nil, options = {})
       @app = app
+      @options = options
       yield self if block_given?
     end
 
@@ -55,13 +56,6 @@ module Rlyeh
       trigger name, env
 
       @app.call env if @app
-    end
-
-    def trigger(name, *args, &block)
-      callbacks = self.class.callbacks name
-      callbacks.each do |callback|
-        callback.bind(self).call *args, &block
-      end
     end
   end
 end
