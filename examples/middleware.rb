@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
-$LOAD_PATH.unshift 'lib'
+$LOAD_PATH.unshift 'lib', '../lib'
 require 'rlyeh'
 require 'logger'
 
