@@ -1,30 +1,32 @@
 module Rlyeh
   module Middlewares
     class Builder
-      def initialize(&block)
-        @ins = []
+      def initialize(app = nil, &block)
+        @stack = []
+        @runner = app
         instance_eval(&block) if block_given?
       end
 
-      def self.app(&block)
-        self.new(&block).to_app
+      def self.app(app = nil, &block)
+        self.new(app, &block).to_app
       end
 
       def use(middleware, *args, &block)
-        @ins << lambda { |app| middleware.new(app, *args, &block) }
+        @stack << proc { |app| middleware.new(app, *args, &block) }
       end
 
       def use!(middleware, *args, &block)
-        @ins.unshift lambda { |app| middleware.new(app, *args, &block) }
+        @stack.unshift lambda { |app| middleware.new(app, *args, &block) }
       end
 
       def run(app)
-        @ins << app #lambda { |nothing| app }
+        @runner = app
       end
 
       def to_app
-        inner_app = @ins.last
-        @ins[0...-1].reverse.inject(inner_app) { |a, e| e.call(a) }
+        @stack.reverse.inject(@runner) do |inner, outer|
+          outer.call inner
+        end
       end
 
       def call(env)
