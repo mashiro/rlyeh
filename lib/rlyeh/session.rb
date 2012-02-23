@@ -2,9 +2,10 @@ require 'rlyeh/filters'
 
 module Rlyeh
   class Session
-    attr_reader :channel, :connections
+    attr_reader :id, :channel, :connections
 
-    def initialize
+    def initialize(id)
+      @id = id
       @channel = EventMachine::Channel.new
       @connections = {}
     end

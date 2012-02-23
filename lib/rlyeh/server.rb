@@ -5,7 +5,7 @@ require 'rlyeh/filters'
 module Rlyeh
   class Server
     attr_reader :options, :host, :port
-    attr_reader :klass, :signature, :connections
+    attr_reader :klass, :signature, :sessions
 
     def initialize(*args)
       @options = Rlyeh::Utils.extract_options! args
@@ -13,7 +13,7 @@ module Rlyeh
       @port = @options.delete(:port) || 46667
       @klass = args.shift
       @signature = nil
-      @connections = []
+      @sessions = {}
     end
 
     def self.start(*args)
@@ -35,7 +35,6 @@ module Rlyeh
 
     def bind(connection)
       puts 'bind'
-      @connections.push connection
     end
 
     def unbind(connection)
@@ -45,11 +44,10 @@ module Rlyeh
 
         if session.empty?
           session.close
-          @sessions.delete session
+          @sessions.delete session.id
         end
       end
 
-      @connections.delete connection
       puts 'unbind'
     end
 

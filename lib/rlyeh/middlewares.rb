@@ -3,5 +3,6 @@ module Rlyeh
     autoload :Parser,  'rlyeh/middlewares/parser'
     autoload :Builder, 'rlyeh/middlewares/builder'
     autoload :Logger,  'rlyeh/middlewares/logger'
+    autoload :Auth,    'rlyeh/middlewares/auth'
   end
 end

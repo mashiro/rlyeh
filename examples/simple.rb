@@ -4,14 +4,14 @@ $LOAD_PATH.unshift 'lib', '../lib'
 require 'rlyeh'
 
 class MyApp < Rlyeh::Base
-  on :privmsg do |env|
-    p "MyApp1: #{env.message}"
-    false
+  use Rlyeh::Middlewares::Logger, :level => 0
+  use Rlyeh::Middlewares::Auth do |auth|
+    auth.nick if [auth.nick, auth.pass] == ['dankogai', 'kogaidan']
   end
 
   on :privmsg do |env|
-    p "MyApp2: #{env.message}"
+    puts "RECV: #{env.message}"
   end
 end
 
-Rlyeh.run MyApp
+Rlyeh.run MyApp, :host => '0.0.0.0'
