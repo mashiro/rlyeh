@@ -1,6 +1,6 @@
 require 'rlyeh/connection'
 require 'rlyeh/utils'
-require 'rlyeh/filter'
+require 'rlyeh/filters'
 
 module Rlyeh
   class Server
@@ -53,7 +53,7 @@ module Rlyeh
       puts 'unbind'
     end
 
-    include Rlyeh::Filter
-    define_filter :start, :stop, :bind, :unbind
+    include Rlyeh::Filters
+    define_filters :start, :stop, :bind, :unbind
   end
 end

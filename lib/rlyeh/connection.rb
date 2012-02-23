@@ -1,6 +1,6 @@
 require 'ircp'
 require 'rlyeh/environment'
-require 'rlyeh/filter'
+require 'rlyeh/filters'
 
 module Rlyeh
   class Connection < EventMachine::Connection
@@ -45,7 +45,7 @@ module Rlyeh
       !!@session
     end
 
-    include Rlyeh::Filter
-    define_filter :attached, :detached
+    include Rlyeh::Filters
+    define_filters :attached, :detached
   end
 end

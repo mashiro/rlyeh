@@ -1,4 +1,4 @@
-require 'rlyeh/filter'
+require 'rlyeh/filters'
 
 module Rlyeh
   class Session
@@ -35,7 +35,7 @@ module Rlyeh
       @connections.empty?
     end
 
-    include Rlyeh::Filter
-    define_filter :attach, :detach, :close, :send_data
+    include Rlyeh::Filters
+    define_filters :attach, :detach, :close, :send_data
   end
 end
