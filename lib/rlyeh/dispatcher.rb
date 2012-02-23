@@ -1,3 +1,5 @@
+require 'rlyeh/utils'
+
 module Rlyeh
   module Dispatcher
     def self.included(base)
@@ -7,7 +9,15 @@ module Rlyeh
     module ClassMethods
       def callbacks(name)
         @dispatchers ||= {}
-        callbacks = @dispatchers[name] || []
+
+        callbacks = @dispatchers.select do |key, value|
+          if key.is_a?(Regexp)
+            key =~ name
+          else
+            key == name
+          end
+        end.values.flatten
+
         if superclass.respond_to?(:callbacks)
           superclass.callbacks(name) + callbacks
         else
@@ -17,18 +27,16 @@ module Rlyeh
 
       def on(name, &block)
         @dispatchers ||= {}
-        name = name.to_s
+        name = name.to_s if name.is_a?(Symbol)
         callbacks = (@dispatchers[name] ||= [])
-        callbacks << generate_method(name, &block)
+        callbacks << Rlyeh::Utils.generate_method(self, "__on_#{name}", block)
         callbacks.uniq!
       end
+    end
 
-      def generate_method(method_name, &block)
-        define_method method_name, &block
-        method = instance_method method_name
-        remove_method method_name
-        method
-      end
+    def call(env)
+      dispatch env
+      @app.call env if @app
     end
 
     def dispatch(env)
@@ -37,11 +45,9 @@ module Rlyeh
     end
 
     def trigger(name, *args, &block)
-      catch :pass do
-        callbacks = self.class.callbacks name
-        callbacks.each do |callback|
-          throw :pass if callback.bind(self).call(*args, &block) == false
-        end
+      callbacks = self.class.callbacks name
+      callbacks.each do |callback|
+        break if callback.bind(self).call(*args, &block) == false
       end
     end
   end
