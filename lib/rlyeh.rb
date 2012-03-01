@@ -7,6 +7,7 @@ module Rlyeh
   autoload :Connection,   'rlyeh/connection'
   autoload :Session,      'rlyeh/session'
   autoload :Environment,  'rlyeh/environment'
+  autoload :NumericReply, 'rlyeh/numeric_reply'
   autoload :Base,         'rlyeh/base'
 
   autoload :Dispatcher,   'rlyeh/dispatcher'
