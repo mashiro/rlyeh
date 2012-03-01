@@ -4,8 +4,8 @@ $LOAD_PATH.unshift 'lib', '../lib'
 require 'rlyeh'
 
 class MyApp < Rlyeh::Base
-  use Rlyeh::Middlewares::Logger, :level => 0
-  use Rlyeh::Middlewares::Auth do |auth|
+  use Rlyeh::DeepOnes::Logger, :level => 0
+  use Rlyeh::DeepOnes::Auth do |auth|
     auth.nick if [auth.nick, auth.pass] == ['dankogai', 'kogaidan']
   end
 
@@ -14,4 +14,4 @@ class MyApp < Rlyeh::Base
   end
 end
 
-Rlyeh.run MyApp, :host => '0.0.0.0'
+Rlyeh.emerge MyApp, :host => '0.0.0.0'

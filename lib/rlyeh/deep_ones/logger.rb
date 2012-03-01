@@ -1,7 +1,7 @@
 require 'logger'
 
 module Rlyeh
-  module Middlewares
+  module DeepOnes
     class Logger
       def initialize(app, options = {})
         @app = app

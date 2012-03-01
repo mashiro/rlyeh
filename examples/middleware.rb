@@ -22,7 +22,7 @@ class MyMiddleware
 end
 
 class MyApp < Rlyeh::Base
-  use Rlyeh::Middlewares::Logger, :level => Logger::DEBUG
+  use Rlyeh::DeepOnes::Logger, :level => Logger::DEBUG
   use MyMiddleware
 
   on :privmsg do |env|

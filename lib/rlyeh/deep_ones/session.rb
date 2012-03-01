@@ -1,5 +1,5 @@
 module Rlyeh
-  module Middlewares
+  module DeepOnes
     class Session
       attr_reader :channel, :subscribers
 

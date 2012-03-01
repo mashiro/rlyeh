@@ -1,7 +1,7 @@
 require 'ircp'
 
 module Rlyeh
-  module Middlewares
+  module DeepOnes
     class Parser
       def initialize(app)
         @app = app

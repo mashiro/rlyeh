@@ -1,6 +1,6 @@
 require 'rlyeh/dispatcher'
-require 'rlyeh/middlewares/builder'
-require 'rlyeh/middlewares/parser'
+require 'rlyeh/deep_ones/builder'
+require 'rlyeh/deep_ones/parser'
 
 module Rlyeh
   class Base
@@ -24,7 +24,7 @@ module Rlyeh
 
       alias new! new unless method_defined? :new!
       def new(*args, &block)
-        build(Rlyeh::Middlewares::Builder.new, *args, &block).to_app
+        build(Rlyeh::DeepOnes::Builder.new, *args, &block).to_app
       end
 
       def build(builder, *args, &block)
@@ -35,7 +35,7 @@ module Rlyeh
       end
 
       def setup_default_middlewares(builder)
-        builder.use! Rlyeh::Middlewares::Parser
+        builder.use! Rlyeh::DeepOnes::Parser
       end
 
       def setup_middlewares(builder)

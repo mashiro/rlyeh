@@ -1,7 +1,7 @@
 require 'rlyeh/dispatcher'
 
 module Rlyeh
-  module Middlewares
+  module DeepOnes
     class Auth
       include Rlyeh::Dispatcher
 

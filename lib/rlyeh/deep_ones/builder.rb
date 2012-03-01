@@ -1,5 +1,5 @@
 module Rlyeh
-  module Middlewares
+  module DeepOnes
     class Builder
       def initialize(app = nil, &block)
         @stack = []

@@ -29,6 +29,7 @@ module Rlyeh
           EventMachine.run &starter
         end
       end
+      alias_method :emerge, :run
 
       def stop
         servers.each { |server| server.stop }

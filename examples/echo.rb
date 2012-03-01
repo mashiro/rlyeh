@@ -10,4 +10,4 @@ class Echo < Rlyeh::Base
   end
 end
 
-Rlyeh.run Echo
+Rlyeh.emerge Echo
