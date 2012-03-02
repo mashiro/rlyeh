@@ -1,3 +1,4 @@
+require 'socket'
 require 'rlyeh/dispatcher'
 
 module Rlyeh
@@ -5,7 +6,7 @@ module Rlyeh
     class Auth
       include Rlyeh::Dispatcher
 
-      attr_reader :nick, :pass, :user, :real
+      attr_reader :nick, :pass, :user, :real, :host
 
       def initialize(app, &authenticator)
         @app = app
@@ -15,7 +16,11 @@ module Rlyeh
 
       def call(env)
         dispatch env
-        @app.call env if authorized?
+
+        if authorized?
+          env.auth = self
+          @app.call env
+        end
       end
 
       def load_session(env, id)
@@ -24,6 +29,15 @@ module Rlyeh
 
       def authorized?
         @authorized
+      end
+
+      def authorized(env)
+        env.connection.tap do |conn|
+          conn.send_numeric_reply :welcome, @nick, "Welcome to the Internet Relay Network #{@nick}!#{@user}@#{@host}"
+          conn.send_numeric_reply :yourhost, @nick, "Your host is #{"Rlyeh"}, running version #{Rlyeh::VERSION}"
+          conn.send_numeric_reply :created,  @nick, "This server was created #{Time.now}"
+          conn.send_numeric_reply :myinfo, @nick, "#{"Rlyeh"} #{Rlyeh::VERSION} #{""} #{""}"
+        end
       end
 
       on :pass do |env|
@@ -37,14 +51,16 @@ module Rlyeh
       on :user do |env|
         @user = env.message.params[0]
         @real = env.message.params[3]
+        port, @host = Socket.unpack_sockaddr_in(env.connection.get_peername)
 
-        session_id = @authenticator.call(self) if @authenticator
+        session_id = @authenticator.call(self)
         if session_id.nil?
           p "Auth error"
         else
           @authorized = true
           session = load_session env, session_id
           session.attach env.connection
+          authorized env
           p 'Session attached.'
         end
       end

@@ -1,10 +1,12 @@
 require 'ircp'
 require 'rlyeh/environment'
 require 'rlyeh/filters'
+require 'rlyeh/sendable'
 
 module Rlyeh
   class Connection < EventMachine::Connection
     include EventMachine::Protocols::LineText2
+    include Rlyeh::Sendable
 
     attr_reader :server, :klass, :options
     attr_reader :app, :session
