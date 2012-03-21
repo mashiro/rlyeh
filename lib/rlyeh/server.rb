@@ -5,13 +5,13 @@ require 'rlyeh/filters'
 module Rlyeh
   class Server
     attr_reader :options, :host, :port
-    attr_reader :klass, :signature, :sessions
+    attr_reader :app_class, :signature, :sessions
 
     def initialize(*args)
       @options = Rlyeh::Utils.extract_options! args
       @host = @options.delete(:host) || "127.0.0.1"
       @port = @options.delete(:port) || 46667
-      @klass = args.shift
+      @app_class = args.shift
       @signature = nil
       @sessions = {}
     end
@@ -21,7 +21,7 @@ module Rlyeh
     end
 
     def start
-      args = [self, @klass, options]
+      args = [self, @app_class, options]
       @signature = EventMachine.start_server @host, @port, Rlyeh::Connection, *args do |connection|
         bind connection
       end

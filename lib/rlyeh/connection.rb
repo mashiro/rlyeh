@@ -8,18 +8,18 @@ module Rlyeh
     include EventMachine::Protocols::LineText2
     include Rlyeh::Sendable
 
-    attr_reader :server, :klass, :options
+    attr_reader :server, :app_class, :options
     attr_reader :app, :session
 
-    def initialize(server, klass, options)
+    def initialize(server, app_class, options)
       @server = server
-      @klass = klass
+      @app_class = app_class
       @options = options
       set_delimiter "\r\n"
     end
 
     def post_init
-      @app = klass.new nil, @options
+      @app = app_class.new nil, @options
     end
 
     def unbind
