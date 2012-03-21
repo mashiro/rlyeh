@@ -22,14 +22,6 @@ module Rlyeh
       end
     end
 
-    unless respond_to? :singleton_class
-      def singleton_class
-        class << self
-          self
-        end
-      end
-    end
-
     def run_filters(name, *args, &block)
       catch :halt do
         _run_filters name, [:before, :arround], *args
@@ -71,7 +63,7 @@ module Rlyeh
 
     def _generate_filter_method(name, type, block)
       method_name = "__filter_#{type}_#{name}"
-      Rlyeh::Utils.generate_method(singleton_class, method_name, block)
+      Rlyeh::Utils.generate_method(Rlyeh::Utils.singleton_class(self), method_name, block)
     end
 
     def _insert_filter(names, type, block, options = {})

@@ -1,6 +1,16 @@
 module Rlyeh
   module Utils
     class << self
+      def singleton_class(obj)
+        if obj.respond_to?(:singleton_class)
+          obj.singleton_class
+        else
+          class << obj
+            self
+          end
+        end
+      end
+
       def extract_options(args)
         args.last.is_a?(::Hash) ? args.last : {}
       end
