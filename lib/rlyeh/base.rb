@@ -1,10 +1,15 @@
 require 'rlyeh/dispatcher'
+require 'rlyeh/settings'
 require 'rlyeh/deep_ones/builder'
 require 'rlyeh/deep_ones/parser'
 
 module Rlyeh
   class Base
     include Rlyeh::Dispatcher
+    include Rlyeh::Settings
+
+    set :server_name, 'Rlyeh'
+    set :server_version, Rlyeh::VERSION
 
     class << self
       def middlewares
