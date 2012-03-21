@@ -12,6 +12,7 @@ module Rlyeh
 
   autoload :Dispatcher,   'rlyeh/dispatcher'
   autoload :Filter,       'rlyeh/filter'
+  autoload :Settings,     'rlyeh/settings'
 
   require 'rlyeh/deep_ones'
 
