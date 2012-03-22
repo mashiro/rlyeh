@@ -40,6 +40,7 @@ module Rlyeh
       end
 
       def setup_default_middlewares(builder)
+        builder.use! Rlyeh::DeepOnes::Closer
         builder.use! Rlyeh::DeepOnes::Parser
       end
 
