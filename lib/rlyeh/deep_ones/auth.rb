@@ -32,12 +32,14 @@ module Rlyeh
       end
 
       def authorized(env)
-        settings = env.connection.app_class.settings
+        name = env.settings.server_name
+        version = env.settings.server_version
+        
         env.connection.tap do |conn|
           conn.send_numeric_reply :welcome, @host, "Welcome to the Internet Relay Network #{@nick}!#{@user}@#{@host}"
-          conn.send_numeric_reply :yourhost, @host, "Your host is #{settings.server_name}, running version #{settings.server_version}"
+          conn.send_numeric_reply :yourhost, @host, "Your host is #{name}, running version #{version}"
           conn.send_numeric_reply :created,  @host, "This server was created #{Time.now}"
-          conn.send_numeric_reply :myinfo, @host, "#{settings.server_name} #{settings.server_version} #{""} #{""}"
+          conn.send_numeric_reply :myinfo, @host, "#{name} #{version} #{""} #{""}"
         end
       end
 

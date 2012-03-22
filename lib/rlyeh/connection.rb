@@ -30,6 +30,7 @@ module Rlyeh
       env.data = data
       env.server = @server
       env.connection = self
+      env.settings = @app_class.settings
 
       @app.call env
     end
