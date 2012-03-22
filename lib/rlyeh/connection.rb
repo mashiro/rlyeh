@@ -1,4 +1,3 @@
-require 'ircp'
 require 'rlyeh/environment'
 require 'rlyeh/filters'
 require 'rlyeh/sendable'
