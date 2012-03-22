@@ -58,11 +58,9 @@ module Rlyeh
     end
 
     def call(env)
-      catch :halt do
-        name = env.message.command.to_s.downcase
-        trigger name, env
-        @app.call env if @app
-      end
+      name = env.message.command.to_s.downcase
+      trigger name, env
+      @app.call env if @app
     end
 
     def halt

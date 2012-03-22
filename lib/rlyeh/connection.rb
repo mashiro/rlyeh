@@ -32,7 +32,9 @@ module Rlyeh
       env.connection = self
       env.settings = @app_class.settings
 
-      @app.call env
+      catch :halt do
+        @app.call env
+      end
     end
 
     def attached(session)
