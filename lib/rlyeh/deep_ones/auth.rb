@@ -35,11 +35,15 @@ module Rlyeh
         name = env.settings.server_name
         version = env.settings.server_version
         
-        env.connection.tap do |conn|
-          conn.send_numeric_reply :welcome, @host, "Welcome to the Internet Relay Network #{@nick}!#{@user}@#{@host}"
-          conn.send_numeric_reply :yourhost, @host, "Your host is #{name}, running version #{version}"
-          conn.send_numeric_reply :created,  @host, "This server was created #{Time.now}"
-          conn.send_numeric_reply :myinfo, @host, "#{name} #{version} #{""} #{""}"
+        messages = {
+          :welcome  => "Welcome to the Internet Relay Network #{@nick}!#{@user}@#{@host}",
+          :yourhost => "Your host is #{name}, running version #{version}",
+          :created  => "This server was created #{Time.now}",
+          :myinfo   => "#{name} #{version} #{""} #{""}"
+        }
+
+        messages.each do |type, message|
+          env.connection.send_numeric_reply type, @host, message
         end
       end
 
