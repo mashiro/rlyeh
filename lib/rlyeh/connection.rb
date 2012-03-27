@@ -27,6 +27,9 @@ module Rlyeh
 
     def receive_line(data)
       env = Rlyeh::Environment.new
+      env.rlyeh = Rlyeh::Environment.new.tap do |rlyeh|
+        rlyeh.version = Rlyeh::VERSION
+      end
       env.data = data
       env.server = @server
       env.connection = self
