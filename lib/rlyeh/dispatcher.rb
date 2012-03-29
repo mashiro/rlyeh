@@ -7,30 +7,31 @@ module Rlyeh
     end
 
     module ClassMethods
-      def callbacks(name)
-        @dispatchers ||= {}
-
-        callbacks = @dispatchers.select do |key, value|
-          if key.is_a?(Regexp)
-            key =~ name
-          else
-            key == name
+      def callbacks(target)
+        @dispatchers ||= []
+        callbacks = @dispatchers.select do |item|
+          key = item[0]
+          case key
+          when Regexp then key =~ target
+          else             key == target
           end
-        end.values.flatten
+        end.map { |item| item[1] }.flatten
 
         if superclass.respond_to?(:callbacks)
-          superclass.callbacks(name) + callbacks
+          superclass.callbacks(target) + callbacks
         else
           callbacks
         end
       end
 
-      def on(name, &block)
-        @dispatchers ||= {}
-        name = name.to_s if name.is_a?(Symbol)
-        callbacks = (@dispatchers[name] ||= [])
-        callbacks << Rlyeh::Utils.generate_method(self, "__on_#{name}", block)
-        callbacks.uniq!
+      def on(*args, &block)
+        options = Rlyeh::Utils.extract_options! args
+        target = args.shift
+        target = Array(options[:scope]) + Array(target) if [String, Symbol].any? { |type| target.is_a?(type) }
+        target = target.join('.') if target.is_a?(Array)
+
+        @dispatchers ||= []
+        @dispatchers << [target, Rlyeh::Utils.generate_method(self, "__on_#{target}", block)]
       end
     end
 
@@ -40,12 +41,14 @@ module Rlyeh
     end
 
     def dispatch(env)
-      name = env.message.command.to_s.downcase
-      trigger name, env
+      if env.message?
+        target = env.message.command.to_s.downcase
+        trigger target, env
+      end
     end
 
-    def trigger(name, *args, &block)
-      callbacks = self.class.callbacks name
+    def trigger(target, *args, &block)
+      callbacks = self.class.callbacks target
       callbacks.each do |callback|
         break if callback.bind(self).call(*args, &block) == false
       end
