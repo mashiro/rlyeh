@@ -58,8 +58,7 @@ module Rlyeh
     end
 
     def call(env)
-      name = env.message.command.to_s.downcase
-      trigger name, env
+      dispatch env
       @app.call env if @app
     end
 

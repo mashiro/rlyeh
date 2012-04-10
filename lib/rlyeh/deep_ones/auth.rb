@@ -19,7 +19,7 @@ module Rlyeh
 
         if authorized?
           env.auth = self
-          @app.call env
+          @app.call env if @app
         end
       end
 

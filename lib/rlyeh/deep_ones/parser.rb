@@ -11,8 +11,10 @@ module Rlyeh
         begin
           message = Ircp.parse env.data
           env.message = message
-          @app.call env
+          env.event = message.command.to_s.downcase
+          @app.call env if @app
         rescue Ircp::ParseError => e
+          # FIXME
           p e
         end
       end
