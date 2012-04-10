@@ -1,4 +1,3 @@
-require 'socket'
 require 'rlyeh/dispatcher'
 
 module Rlyeh
@@ -58,7 +57,7 @@ module Rlyeh
       on :user do |env|
         @user = env.message.params[0]
         @real = env.message.params[3]
-        port, @host = Socket.unpack_sockaddr_in(env.connection.get_peername)
+        @host = env.connection.host
 
         session_id = @authenticator.call(self)
         if session_id.nil?

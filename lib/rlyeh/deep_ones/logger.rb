@@ -1,21 +1,18 @@
-require 'logger'
-
 module Rlyeh
   module DeepOnes
     class Logger
-      def initialize(app, options = {})
+      def initialize(app, level = :info)
         @app = app
-        @logger = options[:logger] || ::Logger.new(STDOUT)
-        @logger.level = options[:level] || ::Logger::INFO
+        @level = level
       end
 
       def call(env)
         write env
-        @app.call env
+        @app.call env if @app
       end
 
       def write(env)
-        @logger.debug env.data
+        env.logger.send @level, env.data
       end
     end
   end

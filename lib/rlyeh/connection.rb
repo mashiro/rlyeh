@@ -1,3 +1,4 @@
+require 'socket'
 require 'rlyeh/environment'
 require 'rlyeh/filters'
 require 'rlyeh/sendable'
@@ -8,7 +9,7 @@ module Rlyeh
     include Rlyeh::Sendable
 
     attr_reader :server, :app_class, :options
-    attr_reader :app, :session
+    attr_reader :app, :host, :port, :session
 
     def initialize(server, app_class, options)
       @server = server
@@ -19,6 +20,7 @@ module Rlyeh
 
     def post_init
       @app = app_class.new nil, @options
+      @port, @host = Socket.unpack_sockaddr_in get_peername
     end
 
     def unbind
@@ -27,9 +29,8 @@ module Rlyeh
 
     def receive_line(data)
       env = Rlyeh::Environment.new
-      env.rlyeh = Rlyeh::Environment.new.tap do |rlyeh|
-        rlyeh.version = Rlyeh::VERSION
-      end
+      env.version = Rlyeh::VERSION
+      env.logger = @server.logger
       env.data = data
       env.server = @server
       env.connection = self
