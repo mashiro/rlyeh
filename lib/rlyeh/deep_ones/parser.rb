@@ -14,8 +14,7 @@ module Rlyeh
           env.event = message.command.to_s.downcase
           @app.call env if @app
         rescue Ircp::ParseError => e
-          # FIXME
-          p e
+          env.logger.debug "#{e.class} - #{e.to_s}"
         end
       end
     end

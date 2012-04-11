@@ -61,13 +61,13 @@ module Rlyeh
 
         session_id = @authenticator.call(self)
         if session_id.nil?
-          p "Auth error"
+          env.logger.debug "Authentication faild #{env.connection.host}:#{env.connection.port}"
         else
           @authorized = true
           session = load_session env, session_id
           session.attach env.connection
           authorized env
-          p 'Session attached.'
+          env.logger.debug "Session attached #{env.connection.host}:#{env.connection.port}"
         end
       end
     end
