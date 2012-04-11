@@ -13,7 +13,9 @@ module Rlyeh
       @host = @options.delete(:host) || "127.0.0.1"
       @port = @options.delete(:port) || 46667
       @logger = @options.delete(:logger) || ::Logger.new($stdout).tap do |logger|
-        logger.formatter = proc { |severity, datetime, progname, msg| "[#{datetime}] #{severity.ljust(5)} #{msg}\n" }
+        logger.formatter = proc do |severity, datetime, progname, message|
+          "[#{datetime}] #{severity.ljust(5)} #{[progname, message].compact.join(': ')}\n"
+        end
       end
       @app_class = args.shift
       @signature = nil
@@ -43,7 +45,7 @@ module Rlyeh
     end
 
     def bind(connection)
-      @logger.debug "Bind #{connection.host}:#{connection.port}"
+      @logger.debug('Bind') { "#{connection.host}:#{connection.port}" }
     end
 
     def unbind(connection)
@@ -57,7 +59,7 @@ module Rlyeh
         end
       end
 
-      @logger.debug "Unbind #{connection.host}:#{connection.port}"
+      @logger.debug('Unbind') { "#{connection.host}:#{connection.port}" }
     end
 
     include Rlyeh::Filters

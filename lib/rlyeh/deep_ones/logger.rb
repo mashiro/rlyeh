@@ -1,9 +1,11 @@
+require 'logger'
+
 module Rlyeh
   module DeepOnes
     class Logger
-      def initialize(app, level = :info)
+      def initialize(app, logger = nil)
         @app = app
-        @level = level
+        @logger = logger
       end
 
       def call(env)
@@ -12,7 +14,7 @@ module Rlyeh
       end
 
       def write(env)
-        env.logger.send @level, env.data
+        (@logger || env.logger).debug('Data') { env.data }
       end
     end
   end
