@@ -34,9 +34,9 @@ describe Rlyeh::Environment do
     end
 
     context 'has' do
-      it { should be_foo }
-      it { should be_bar }
-      it { should_not be_buzz }
+      it { should be_has_foo }
+      it { should be_has_bar }
+      it { should_not be_has_buzz }
     end
   end
 end
