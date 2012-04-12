@@ -1,8 +1,10 @@
-require 'logger'
+require 'rlyeh/loggable'
 
 module Rlyeh
   module DeepOnes
     class Logger
+      include Rlyeh::Loggable
+
       def initialize(app, logger = nil)
         @app = app
         @logger = logger
@@ -14,7 +16,7 @@ module Rlyeh
       end
 
       def write(env)
-        (@logger || env.logger).debug('Data') { env.data }
+        debug(@logger || env) { "Recieve: #{env.data}" }
       end
     end
   end
