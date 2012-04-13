@@ -10,6 +10,8 @@ module Rlyeh
 
     set :server_name, 'Rlyeh'
     set :server_version, Rlyeh::VERSION
+    set :available_user_modes, ''
+    set :available_channel_modes, ''
 
     class << self
       def middlewares

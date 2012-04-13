@@ -44,11 +44,14 @@ module Rlyeh
 
           name = env.settings.server_name
           version = env.settings.server_version
+          user_modes = env.settings.available_user_modes
+          channel_modes = env.settings.available_channel_modes
+
           messages = {
             :welcome  => "Welcome to the Internet Relay Network #{@nick}!#{@user}@#{@host}",
             :yourhost => "Your host is #{name}, running version #{version}",
             :created => "This server was created #{Time.now}",
-            :myinfo => "#{name} #{version} #{""} #{""}"
+            :myinfo => "#{name} #{version} #{user_modes} #{channel_modes}"
           }
 
           messages.each do |type, message|
