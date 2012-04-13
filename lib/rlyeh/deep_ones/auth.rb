@@ -28,13 +28,17 @@ module Rlyeh
         @authenticated
       end
 
-      def authenticate!(env, auth)
-        @authenticator.call self
+      def authenticate!(env)
+        if @authenticator && @authenticator.call(self)
+          succeeded env
+        else
+          failed env
+        end
       end
 
-      def succeeded(env, id)
+      def succeeded(env)
         @authorized = true
-        session = load_session env, id
+        session = load_session env, to_session_id
         session.attach env.connection
 
         name = env.settings.server_name
@@ -49,13 +53,20 @@ module Rlyeh
         messages.each do |type, message|
           env.connection.send_numeric_reply type, @host, message
         end
+
+        debug(env) { "Succeeded #{env.connection.host}:#{env.connection.port}" }
       end
 
       def failed(env)
+        debug(env) { "Failed #{env.connection.host}:#{env.connection.port}" }
       end
 
-      def load_session(env, id)
-        env.server.sessions[id] ||= Rlyeh::Session.new(id)
+      def to_session_id
+        @nick
+      end
+
+      def load_session(env, session_id)
+        env.server.sessions[session_id] ||= Rlyeh::Session.new(session_id)
       end
 
       on :pass do |env|
@@ -70,14 +81,7 @@ module Rlyeh
         @user = env.message.params[0]
         @real = env.message.params[3]
         @host = env.connection.host
-
-        if (id = authenticate!(env, self))
-          succeeded env, id
-          debug(env) { "Succeeded #{env.connection.host}:#{env.connection.port}" }
-        else
-          failed env
-          debug(env) { "Failed #{env.connection.host}:#{env.connection.port}" }
-        end
+        authenticate! env
       end
     end
   end
