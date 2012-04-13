@@ -62,6 +62,7 @@ module Rlyeh
         end
 
         def failed(env)
+          env.connection.send_numeric_reply :passwdmismatch, @host, ':Password incorrect'
           debug(env) { "Failed #{env.connection.host}:#{env.connection.port}" }
         end
 
