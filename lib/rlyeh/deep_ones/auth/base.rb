@@ -12,8 +12,8 @@ module Rlyeh
 
         def initialize(app, &block)
           @app = app
-          @authenticator = block
           @authenticated = false
+          instance_eval &block if block
         end
 
         def call(env)
@@ -29,19 +29,23 @@ module Rlyeh
           @authenticated
         end
 
-        def authenticate!(env)
-          if @authenticator && @authenticator.call(self)
-            succeeded env
-          else
-            failed env
-          end
+        def try(env)
+          raise NotImplementedError
         end
 
         def succeeded(env)
           @authorized = true
           session = load_session env, to_session_id
           session.attach env.connection
+          debug(env) { "Succeeded #{env.connection.host}:#{env.connection.port}" }
+        end
 
+        def failed(env)
+          env.connection.send_numeric_reply :passwdmismatch, @host, ':Password incorrect'
+          debug(env) { "Failed #{env.connection.host}:#{env.connection.port}" }
+        end
+
+        def welcome(env)
           name = env.settings.server_name
           version = env.settings.server_version
           user_modes = env.settings.available_user_modes
@@ -55,15 +59,8 @@ module Rlyeh
           }
 
           messages.each do |type, message|
-            env.connection.send_numeric_reply type, @host, message
+            env.connection.send_numeric_reply type, @nick, ":#{message}", :prefix => {:servername => name}
           end
-
-          debug(env) { "Succeeded #{env.connection.host}:#{env.connection.port}" }
-        end
-
-        def failed(env)
-          env.connection.send_numeric_reply :passwdmismatch, @host, ':Password incorrect'
-          debug(env) { "Failed #{env.connection.host}:#{env.connection.port}" }
         end
 
         def to_session_id
@@ -86,7 +83,8 @@ module Rlyeh
           @user = env.message.params[0]
           @real = env.message.params[3]
           @host = env.connection.host
-          authenticate! env
+
+          try env
         end
       end
     end

@@ -53,6 +53,14 @@ module Rlyeh
       !!@session
     end
 
+    def send_data(data)
+      if attached?
+        @session.send_data data
+      else
+        super data
+      end
+    end
+
     include Rlyeh::Filters
     define_filters :attached, :detached
   end
