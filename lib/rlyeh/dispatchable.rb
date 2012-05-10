@@ -1,7 +1,7 @@
 require 'rlyeh/utils'
 
 module Rlyeh
-  module Dispatcher
+  module Dispatchable
     def self.included(base)
       base.extend ClassMethods
     end

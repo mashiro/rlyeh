@@ -1,9 +1,7 @@
-require 'rlyeh/dispatcher'
-
 module Rlyeh
   module DeepOnes
     class Closer
-      include Rlyeh::Dispatcher
+      include Rlyeh::Dispatchable
 
       def initialize(app)
         @app = app

@@ -10,9 +10,11 @@ module Rlyeh
   autoload :NumericReply, 'rlyeh/numeric_reply'
   autoload :Base,         'rlyeh/base'
 
-  autoload :Dispatcher,   'rlyeh/dispatcher'
   autoload :Filter,       'rlyeh/filter'
   autoload :Settings,     'rlyeh/settings'
+
+  autoload :Dispatchable, 'rlyeh/dispatchable'
+  autoload :Loggable,     'rlyeh/loggable'
 
   require 'rlyeh/deep_ones'
 

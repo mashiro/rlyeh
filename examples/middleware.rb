@@ -5,7 +5,7 @@ require 'rlyeh'
 require 'logger'
 
 class MyMiddleware
-  include Rlyeh::Dispatcher
+  include Rlyeh::Dispatchable
 
   on :privmsg do |env|
     p "Middleware: #{env.message}"
