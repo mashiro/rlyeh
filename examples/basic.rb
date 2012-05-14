@@ -3,11 +3,11 @@
 $LOAD_PATH.unshift 'lib', '../lib'
 require 'rlyeh'
 
-class Simple < Rlyeh::Base
+class BasicServer < Rlyeh::Base
   use Rlyeh::DeepOnes::Logger
   use Rlyeh::DeepOnes::Auth::Basic, 'dankogai', 'kogaidan'
-  
-  set :server_name, 'Simple'
+
+  set :server_name, 'basic-server'
   set :server_version, '1.0.0'
 
   on :privmsg do |env|
@@ -15,4 +15,4 @@ class Simple < Rlyeh::Base
   end
 end
 
-Rlyeh.emerge Simple, :host => '0.0.0.0'
+Rlyeh.emerge BasicServer, :host => '0.0.0.0'

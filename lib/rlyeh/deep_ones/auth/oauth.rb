@@ -39,11 +39,15 @@ module Rlyeh
           talk env, request_token.authorize_url(@authorize_params)
         end
 
-        private
+        protected
+
+        def sender_nick
+          '$oauth'
+        end
 
         def talk(env, text)
-          prefix = {:nick => '$oauth', :user => 'rlyeh', :host => env.settings.server_name}
-          env.connection.send_message 'PRIVMSG', @nick, ":#{text}", :prefix => prefix
+          target = Target.new env, @nick
+          target.privmsg text, sender_nick
         end
       end
     end
