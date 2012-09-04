@@ -11,7 +11,7 @@ module Rlyeh
     end
 
     def attach(connection)
-      connection.attached self
+      connection.attach self
 
       @connections[connection] = @channel.subscribe do |msg|
         connection.send_data msg
@@ -22,7 +22,7 @@ module Rlyeh
       id = @connections.delete connection
       @channel.unsubscribe id if id
 
-      connection.detached self
+      connection.detach self
     end
 
     def close

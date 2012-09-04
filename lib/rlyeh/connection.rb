@@ -41,11 +41,11 @@ module Rlyeh
       end
     end
 
-    def attached(session)
+    def attach(session)
       @session = session
     end
 
-    def detached(session)
+    def detach(session)
       @session = nil
     end
 

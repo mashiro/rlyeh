@@ -32,7 +32,7 @@ module Rlyeh
 
         def succeeded(env)
           @authorized = true
-          session = load_session env, to_session_id
+          session = load_session env, session_id
           session.attach env.connection
           debug(env) { "Succeeded #{env.connection.host}:#{env.connection.port}" }
         end
@@ -60,7 +60,7 @@ module Rlyeh
           end
         end
 
-        def to_session_id
+        def session_id
           @nick
         end
 
