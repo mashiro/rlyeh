@@ -1,43 +1,65 @@
-require 'socket'
+require 'rlyeh/logger'
 require 'rlyeh/environment'
-require 'rlyeh/filters'
-require 'rlyeh/sendable'
 
 module Rlyeh
-  class Connection < EventMachine::Connection
-    include EventMachine::Protocols::LineText2
-    include Rlyeh::Sendable
+  class Connection
+    include Rlyeh::Logger
 
-    attr_reader :server, :app_class, :options
+    attr_reader :server, :socket
     attr_reader :app, :host, :port, :session
 
-    def initialize(server, app_class, options)
+    def initialize(server, socket)
       @server = server
-      @app_class = app_class
-      @options = options
-      set_delimiter "\r\n"
+      @socket = socket
+      _, @port, @host = @socket.peeraddr
+      @app = @server.app_class.new nil
     end
 
-    def post_init
-      @app = app_class.new nil, @options
-      @port, @host = Socket.unpack_sockaddr_in get_peername
+    def bind
+      debug "Bind connection #{@host}:#{@port}"
+
+      loop do
+        tokenize @socket.readpartial(4096) do |data|
+          invoke data
+        end
+      end
     end
 
     def unbind
-      @server.unbind self
+      debug "Unbind connection #{@host}:#{@port}"
     end
 
-    def receive_line(data)
+    def tokenize(data)
+      @buffer ||= ''
+      @buffer << data
+      while data = @buffer.slice!(/(.+)\n/, 1)
+        yield data.chomp if block_given?
+      end
+    end
+
+    def invoke(data)
       env = Rlyeh::Environment.new
       env.version = Rlyeh::VERSION
-      env.logger = @server.logger
       env.data = data
       env.server = @server
       env.connection = self
-      env.settings = @app_class.settings
+      env.settings = @server.app_class.settings
 
-      catch :halt do
-        @app.call env
+      begin
+        catch :halt do
+          @app.call env
+        end
+      rescue Exception => e
+        crash e
+      end
+    end
+
+    def send(data, multicast = true)
+      data = data.to_s
+      if multicast && attached?
+        @session.send data
+      else
+        @socket.write data
       end
     end
 
@@ -52,16 +74,5 @@ module Rlyeh
     def attached?
       !!@session
     end
-
-    def send_data(data)
-      if attached?
-        @session.send_data data
-      else
-        super data
-      end
-    end
-
-    include Rlyeh::Filters
-    define_filters :attached, :detached
   end
 end

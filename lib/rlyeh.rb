@@ -1,24 +1,42 @@
-require 'eventmachine'
+require 'rlyeh/version'
+
+require 'rlyeh/sendable'
+require 'rlyeh/dispatchable'
+require 'rlyeh/loggable'
+
+#require 'rlyeh/filter'
+require 'rlyeh/logger'
+require 'rlyeh/settings'
+
+require 'rlyeh/server'
+require 'rlyeh/connection'
+require 'rlyeh/session'
+require 'rlyeh/environment'
+require 'rlyeh/numeric_reply'
+require 'rlyeh/target'
+require 'rlyeh/base'
+
+require 'rlyeh/deep_ones'
 
 module Rlyeh
-  autoload :VERSION,      'rlyeh/version'
+  class << self
+    attr_accessor :logger
 
-  autoload :Sendable,     'rlyeh/sendable'
-  autoload :Dispatchable, 'rlyeh/dispatchable'
-  autoload :Loggable,     'rlyeh/loggable'
+    def run(app_class, options = {})
+      supervisor = Rlyeh::Server.supervise_as :server, app_class, options
 
-  autoload :Filter,       'rlyeh/filter'
-  autoload :Settings,     'rlyeh/settings'
+      trap(:INT) do
+        supervisor.terminate
+        exit
+      end
 
-  autoload :Server,       'rlyeh/server'
-  autoload :Connection,   'rlyeh/connection'
-  autoload :Session,      'rlyeh/session'
-  autoload :Environment,  'rlyeh/environment'
-  autoload :NumericReply, 'rlyeh/numeric_reply'
-  autoload :Target,       'rlyeh/target'
-  autoload :Base,         'rlyeh/base'
-
-  require 'rlyeh/deep_ones'
-  require 'rlyeh/runner'
-  include Rlyeh::Runner
+      sleep
+    end
+    alias_method :emerge, :run
+  end
 end
+
+require 'logger'
+Celluloid.logger = nil
+Rlyeh.logger = ::Logger.new $stderr
+
