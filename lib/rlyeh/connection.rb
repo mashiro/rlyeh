@@ -1,14 +1,18 @@
 require 'rlyeh/logger'
 require 'rlyeh/sender'
 require 'rlyeh/environment'
+require 'forwardable'
 
 module Rlyeh
   class Connection
     include Rlyeh::Logger
     include Rlyeh::Sender
+    extend Forwardable
 
     attr_reader :server, :socket
     attr_reader :app, :host, :port, :session
+
+    def_delegators :@socket, :close, :closed?
 
     def initialize(server, socket)
       @server = server

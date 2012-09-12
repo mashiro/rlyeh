@@ -39,8 +39,13 @@ module Rlyeh
 
     def handle_connection(socket)
       connection = Rlyeh::Connection.new self, socket
-      connection.bind
-    rescue EOFError
+      catch :quit do
+        connection.bind
+      end
+      connection.close unless connection.closed?
+    rescue ::EOFError
+      # client disconnected
+    ensure
       close_connection connection
     end
 

@@ -15,8 +15,7 @@ module Rlyeh
       end
 
       on :quit do |env|
-        env.connection.close_connection_after_writing
-        throw :halt
+        throw :quit
       end
     end
   end
