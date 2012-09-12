@@ -1,13 +1,10 @@
 require 'rlyeh/version'
 
-require 'rlyeh/sendable'
-require 'rlyeh/dispatchable'
-require 'rlyeh/loggable'
-
-#require 'rlyeh/filter'
 require 'rlyeh/logger'
-require 'rlyeh/settings'
+require 'rlyeh/dispatcher'
+require 'rlyeh/sender'
 
+require 'rlyeh/settings'
 require 'rlyeh/server'
 require 'rlyeh/connection'
 require 'rlyeh/session'

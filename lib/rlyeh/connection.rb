@@ -1,9 +1,11 @@
 require 'rlyeh/logger'
+require 'rlyeh/sender'
 require 'rlyeh/environment'
 
 module Rlyeh
   class Connection
     include Rlyeh::Logger
+    include Rlyeh::Sender
 
     attr_reader :server, :socket
     attr_reader :app, :host, :port, :session

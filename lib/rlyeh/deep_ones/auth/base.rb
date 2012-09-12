@@ -1,10 +1,11 @@
+require 'rlyeh/dispatcher'
 require 'rlyeh/logger'
 
 module Rlyeh
   module DeepOnes
     module Auth
       class Base
-        include Rlyeh::Dispatchable
+        include Rlyeh::Dispatcher
         include Rlyeh::Logger
 
         attr_reader :nick, :pass, :user, :real, :host

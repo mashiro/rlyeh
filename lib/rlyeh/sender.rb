@@ -3,7 +3,7 @@ require 'rlyeh/numeric_reply'
 require 'rlyeh/utils'
 
 module Rlyeh
-  module Sendable
+  module Sender
     def send_message(command, *args)
       options = Rlyeh::Utils.extract_options! args
       send_data Ircp::Message.new(*args, options.merge(:command => command))
