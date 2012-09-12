@@ -54,10 +54,10 @@ module Rlyeh
       end
     end
 
-    def send(data, multicast = true)
+    def send_data(data, multicast = true)
       data = data.to_s
       if multicast && attached?
-        @session.send data
+        @session.send_data data
       else
         @socket.write data
       end

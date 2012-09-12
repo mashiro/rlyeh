@@ -6,7 +6,7 @@ require 'rlyeh'
 class Echo < Rlyeh::Base
   def call(env)
     conn = env.connection
-    conn.send env.message
+    conn.send_data env.message
   end
 end
 
