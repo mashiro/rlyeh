@@ -21,7 +21,7 @@ module Rlyeh
     attr_accessor :logger
 
     def run(app_class, options = {})
-      supervisor = Rlyeh::Server.supervise_as :server, app_class, options
+      supervisor = Rlyeh::Server.supervise_as :rlyeh_server, app_class, options
 
       trap(:INT) do
         supervisor.terminate
