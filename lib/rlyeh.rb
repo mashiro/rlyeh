@@ -34,6 +34,6 @@ module Rlyeh
 end
 
 require 'logger'
-Celluloid.logger = nil
+#Celluloid.logger = nil
 Rlyeh.logger = ::Logger.new $stderr
 

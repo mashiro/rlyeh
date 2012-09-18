@@ -17,7 +17,7 @@ module Rlyeh
       end
 
       def write(env)
-        @logger.__send__ @level, "Receive: #{env.data}"
+        @logger.__send__ @level, "Message received: #{env.data}"
       end
     end
   end

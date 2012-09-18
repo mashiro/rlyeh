@@ -1,42 +1,41 @@
-require 'rlyeh/filters'
+require 'celluloid'
+require 'set'
+require 'forwardable'
+require 'rlyeh/logger'
 
 module Rlyeh
   class Session
-    attr_reader :id, :channel, :connections
+    include Celluloid
+    include Rlyeh::Logger
+    extend Forwardable
+
+    attr_reader :id, :connections
+    def_delegators :@connections, :include?, :empty?
 
     def initialize(id)
       @id = id
-      @channel = EventMachine::Channel.new
-      @connections = {}
+      @connections = Set.new
+      debug "Session started: #{@id}"
+    end
+
+    def close
+      debug "Session closed: #{@id}"
     end
 
     def attach(connection)
       connection.attach self
-
-      @connections[connection] = @channel.subscribe do |msg|
-        connection.send_data msg
-      end
+      @connections.add connection
     end
 
     def detach(connection)
-      id = @connections.delete connection
-      @channel.unsubscribe id if id
-
+      @connections.delete connection
       connection.detach self
     end
 
-    def close
-    end
-
     def send_data(data)
-      @channel.push data
+      @connections.each do |connection|
+        connection.send_data data, false
+      end
     end
-
-    def empty?
-      @connections.empty?
-    end
-
-    include Rlyeh::Filters
-    define_filters :attach, :detach, :close, :send_data
   end
 end

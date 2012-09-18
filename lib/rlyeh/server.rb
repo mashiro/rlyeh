@@ -1,6 +1,5 @@
 require 'celluloid/io'
 require 'rlyeh/connection'
-require 'rlyeh/sync_delegator'
 require 'rlyeh/logger'
 
 module Rlyeh
@@ -16,51 +15,37 @@ module Rlyeh
       @options = options.dup
       @host = @options.delete(:host) { '127.0.0.1' }
       @port = @options.delete(:port) { 46667 }
-      @sessions = Rlyeh::SyncDelegator.new({})
+      @sessions = {}
       @server = Celluloid::IO::TCPServer.new @host, @port
 
-      run!
-    end
-
-    def run
       info "Rlyeh has emerged on #{@host}:#{@port}"
-      loop { handle_connection! @server.accept }
+      async.run
     end
 
     def finalize
-      if @server
-        @server.close
-        @server = nil
-        info 'Rlyeh has sunk...'
-      end
+      @server.close
+      info 'Rlyeh has sunk...'
     end
 
-    private
+    def run
+      loop do
+        socket = @server.accept
+        async.handle_connection socket
+      end
+    end
 
     def handle_connection(socket)
-      connection = Rlyeh::Connection.new self, socket
-      catch :quit do
-        connection.bind
-      end
-      connection.close unless connection.closed?
-    rescue ::EOFError
-      # client disconnected
+      connection = Connection.new(self, socket)
+      connection.run
+    rescue Exception => e
+      crash e
     ensure
-      close_connection connection
+      connection.close rescue nil
     end
 
-    def close_connection(connection)
-      connection.unbind
-
-      if connection.attached?
-        session = connection.session
-        session.detach connection
-
-        if session.empty?
-          session.close
-          @sessions.delete session.id
-        end
-      end
+    def load_session(session_id)
+      @sessions[session_id] ||= Rlyeh::Session.new(session_id)
     end
   end
 end
+

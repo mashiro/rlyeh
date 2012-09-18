@@ -1,12 +1,15 @@
+require 'celluloid'
+require 'forwardable'
 require 'rlyeh/logger'
 require 'rlyeh/sender'
+require 'rlyeh/worker'
 require 'rlyeh/environment'
-require 'forwardable'
 
 module Rlyeh
   class Connection
     include Rlyeh::Logger
     include Rlyeh::Sender
+    include Rlyeh::Worker
     extend Forwardable
 
     attr_reader :server, :socket
@@ -14,36 +17,58 @@ module Rlyeh
 
     def_delegators :@socket, :close, :closed?
 
+    BUFFER_SIZE = 4096
+
     def initialize(server, socket)
       @server = server
       @socket = socket
       _, @port, @host = @socket.peeraddr
       @app = @server.app_class.new nil
+
+      debug "Connection started: #{@host}:#{@port}"
     end
 
-    def bind
-      debug "Bind connection #{@host}:#{@port}"
+    def close
+      @socket.close unless @socket.closed?
 
-      loop do
-        tokenize @socket.readpartial(4096) do |data|
-          invoke data
+      if attached?
+        @session.detach self
+
+        if @session.empty?
+          @session.close
+          @server.sessions.delete @session.id
+        end
+      end
+
+      debug "Connection closed: #{@host}:#{@port}"
+    end
+
+    def run
+      catch :quit do
+        read_each do |data|
+          invoke do
+            process data
+          end
         end
       end
     end
 
-    def unbind
-      debug "Unbind connection #{@host}:#{@port}"
-    end
+    def read_each(&block)
+      loop do
+        @buffer ||= ''
+        @buffer << @socket.readpartial(BUFFER_SIZE)
 
-    def tokenize(data)
-      @buffer ||= ''
-      @buffer << data
-      while data = @buffer.slice!(/(.+)\n/, 1)
-        yield data.chomp if block_given?
+        while data = @buffer.slice!(/(.+)\n/, 1)
+          block.call data.chomp if block
+        end
       end
+    rescue EOFError => e
+      # client disconnected
+    rescue Celluloid::Task::TerminatedError
+      # kill a running task
     end
 
-    def invoke(data)
+    def process(data)
       env = Rlyeh::Environment.new
       env.version = Rlyeh::VERSION
       env.data = data
@@ -51,12 +76,12 @@ module Rlyeh
       env.connection = self
       env.settings = @server.app_class.settings
 
-      begin
-        catch :halt do
+      catch :halt do
+        begin
           @app.call env
+        rescue Exception => e
+          crash e
         end
-      rescue Exception => e
-        crash e
       end
     end
 
@@ -82,3 +107,4 @@ module Rlyeh
     end
   end
 end
+
