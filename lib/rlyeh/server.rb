@@ -1,75 +1,51 @@
+require 'celluloid/io'
 require 'rlyeh/connection'
-require 'rlyeh/utils'
-require 'rlyeh/filters'
-require 'rlyeh/loggable'
-require 'logger'
+require 'rlyeh/logger'
 
 module Rlyeh
   class Server
-    include Rlyeh::Loggable
-    attr_reader :options, :host, :port, :logger
-    attr_reader :app_class, :signature, :sessions
+    include Celluloid::IO
+    include Rlyeh::Logger
 
-    def initialize(*args)
-      @options = Rlyeh::Utils.extract_options! args
-      @host = @options.delete(:host) || "127.0.0.1"
-      @port = @options.delete(:port) || 46667
-      @logger = @options.delete(:logger) || ::Logger.new($stdout).tap do |logger|
-        logger.formatter = method(:log_formatter)
-      end
-      @app_class = args.shift
-      @signature = nil
+    attr_reader :options, :host, :port
+    attr_reader :app_class, :sessions, :server
+
+    def initialize(app_class, options = {})
+      @app_class = app_class
+      @options = options.dup
+      @host = @options.delete(:host) { '127.0.0.1' }
+      @port = @options.delete(:port) { 46667 }
       @sessions = {}
+      @server = Celluloid::IO::TCPServer.new @host, @port
+
+      info "Rlyeh has emerged on #{@host}:#{@port}"
+      async.run
     end
 
-    def self.start(*args)
-      new(*args).start
+    def finalize
+      @server.close
+      info 'Rlyeh has sunk...'
     end
 
-    def start
-      args = [self, @app_class, options]
-      @signature = EventMachine.start_server @host, @port, Rlyeh::Connection, *args do |connection|
-        bind connection
+    def run
+      loop do
+        socket = @server.accept
+        async.handle_connection socket
       end
-
-      info(@logger) { "Rlyeh has emerged on #{@host}:#{@port}" }
-      self
     end
 
-    def stop
-      EventMachine.stop_server @signature if @signature
-      @signature = nil
-
-      info(@logger) { "Rlyeh has sunk..." }
+    def handle_connection(socket)
+      connection = Connection.new(self, socket)
+      connection.run
+    rescue Exception => e
+      crash e
+    ensure
+      connection.close rescue nil
     end
 
-    def bind(connection)
-      debug(@logger) { "Bind connection #{connection.host}:#{connection.port}" }
+    def load_session(session_id)
+      @sessions[session_id] ||= Rlyeh::Session.new(session_id)
     end
-
-    def unbind(connection)
-      if connection.attached?
-        session = connection.session
-        session.detach connection
-
-        if session.empty?
-          session.close
-          @sessions.delete session.id
-        end
-      end
-
-      debug(@logger) { "Unbind connection #{connection.host}:#{connection.port}" }
-    end
-
-    def log_formatter(severity, datetime, progname, message)
-      s = "#{severity[0].upcase} [#{datetime}]"
-      s << " <#{progname}>" if progname
-      s << " #{message}"
-      s << "\n"
-      s
-    end
-
-    include Rlyeh::Filters
-    define_filters :start, :stop, :bind, :unbind
   end
 end
+

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
-$LOAD_PATH.unshift 'lib', '../lib'
+$:.unshift 'lib', '../lib'
 require 'rlyeh'
 
 class Echo < Rlyeh::Base

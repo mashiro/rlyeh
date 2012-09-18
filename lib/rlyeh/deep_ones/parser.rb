@@ -1,10 +1,10 @@
 require 'ircp'
-require 'rlyeh/loggable'
+require 'rlyeh/logger'
 
 module Rlyeh
   module DeepOnes
     class Parser
-      include Rlyeh::Loggable
+      include Rlyeh::Logger
 
       def initialize(app)
         @app = app
@@ -17,7 +17,7 @@ module Rlyeh
           env.event = message.command.to_s.downcase
           @app.call env if @app
         rescue Ircp::ParseError => e
-          debug(env) { "#{e.class} - #{e.to_s}" }
+          debug "#{e.class}: #{e.to_s}"
         end
       end
     end

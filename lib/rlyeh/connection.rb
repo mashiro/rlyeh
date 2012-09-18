@@ -1,43 +1,96 @@
-require 'socket'
+require 'celluloid'
+require 'forwardable'
+require 'rlyeh/logger'
+require 'rlyeh/sender'
+require 'rlyeh/worker'
 require 'rlyeh/environment'
-require 'rlyeh/filters'
-require 'rlyeh/sendable'
 
 module Rlyeh
-  class Connection < EventMachine::Connection
-    include EventMachine::Protocols::LineText2
-    include Rlyeh::Sendable
+  class Connection
+    include Rlyeh::Logger
+    include Rlyeh::Sender
+    include Rlyeh::Worker
+    extend Forwardable
 
-    attr_reader :server, :app_class, :options
+    attr_reader :server, :socket
     attr_reader :app, :host, :port, :session
 
-    def initialize(server, app_class, options)
+    def_delegators :@socket, :close, :closed?
+
+    BUFFER_SIZE = 4096
+
+    def initialize(server, socket)
       @server = server
-      @app_class = app_class
-      @options = options
-      set_delimiter "\r\n"
+      @socket = socket
+      _, @port, @host = @socket.peeraddr
+      @app = @server.app_class.new nil
+
+      debug "Connection started: #{@host}:#{@port}"
     end
 
-    def post_init
-      @app = app_class.new nil, @options
-      @port, @host = Socket.unpack_sockaddr_in get_peername
+    def close
+      @socket.close unless @socket.closed?
+
+      if attached?
+        @session.detach self
+
+        if @session.empty?
+          @session.close
+          @server.sessions.delete @session.id
+        end
+      end
+
+      debug "Connection closed: #{@host}:#{@port}"
     end
 
-    def unbind
-      @server.unbind self
+    def run
+      catch :quit do
+        read_each do |data|
+          invoke do
+            process data
+          end
+        end
+      end
     end
 
-    def receive_line(data)
+    def read_each(&block)
+      loop do
+        @buffer ||= ''
+        @buffer << @socket.readpartial(BUFFER_SIZE)
+
+        while data = @buffer.slice!(/(.+)\n/, 1)
+          block.call data.chomp if block
+        end
+      end
+    rescue EOFError => e
+      # client disconnected
+    rescue Celluloid::Task::TerminatedError
+      # kill a running task
+    end
+
+    def process(data)
       env = Rlyeh::Environment.new
       env.version = Rlyeh::VERSION
-      env.logger = @server.logger
       env.data = data
       env.server = @server
       env.connection = self
-      env.settings = @app_class.settings
+      env.settings = @server.app_class.settings
 
       catch :halt do
-        @app.call env
+        begin
+          @app.call env
+        rescue Exception => e
+          crash e
+        end
+      end
+    end
+
+    def send_data(data, multicast = true)
+      data = data.to_s
+      if multicast && attached?
+        @session.send_data data
+      else
+        @socket.write data
       end
     end
 
@@ -52,16 +105,6 @@ module Rlyeh
     def attached?
       !!@session
     end
-
-    def send_data(data)
-      if attached?
-        @session.send_data data
-      else
-        super data
-      end
-    end
-
-    include Rlyeh::Filters
-    define_filters :attached, :detached
   end
 end
+

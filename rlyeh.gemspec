@@ -15,10 +15,8 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Rlyeh::VERSION
 
+  gem.add_dependency 'celluloid-io'
   gem.add_dependency 'ircp'
-  gem.add_dependency 'eventmachine'
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'rspec'
-
-  gem.add_development_dependency 'oauth'
 end

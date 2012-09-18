@@ -1,7 +1,9 @@
+require 'rlyeh/dispatcher'
+
 module Rlyeh
   module DeepOnes
     class Closer
-      include Rlyeh::Dispatchable
+      include Rlyeh::Dispatcher
 
       def initialize(app)
         @app = app
@@ -13,8 +15,7 @@ module Rlyeh
       end
 
       on :quit do |env|
-        env.connection.close_connection_after_writing
-        throw :halt
+        throw :quit
       end
     end
   end

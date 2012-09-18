@@ -1,9 +1,12 @@
+require 'rlyeh/dispatcher'
+require 'rlyeh/logger'
+
 module Rlyeh
   module DeepOnes
     module Auth
       class Base
-        include Rlyeh::Dispatchable
-        include Rlyeh::Loggable
+        include Rlyeh::Dispatcher
+        include Rlyeh::Logger
 
         attr_reader :nick, :pass, :user, :real, :host
 
@@ -30,16 +33,20 @@ module Rlyeh
           raise NotImplementedError
         end
 
+        def session_id
+          @nick
+        end
+
         def succeeded(env)
           @authorized = true
-          session = load_session env, session_id
+          session = env.server.load_session session_id
           session.attach env.connection
-          debug(env) { "Succeeded #{env.connection.host}:#{env.connection.port}" }
+          debug "Authentication succeeded #{env.connection.host}:#{env.connection.port}"
         end
 
         def failed(env)
           env.connection.send_numeric_reply :passwdmismatch, @host, ':Password incorrect'
-          debug(env) { "Failed #{env.connection.host}:#{env.connection.port}" }
+          debug "Authentication failed #{env.connection.host}:#{env.connection.port}"
         end
 
         def welcome(env)
@@ -58,14 +65,6 @@ module Rlyeh
           messages.each do |type, message|
             env.connection.send_numeric_reply type, @nick, ":#{message}", :prefix => {:servername => name}
           end
-        end
-
-        def session_id
-          @nick
-        end
-
-        def load_session(env, session_id)
-          env.server.sessions[session_id] ||= Rlyeh::Session.new(session_id)
         end
 
         on :pass do |env|
