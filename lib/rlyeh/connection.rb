@@ -55,8 +55,8 @@ module Rlyeh
 
     def read_each(&block)
       loop do
-        @buffer ||= ''
-        @buffer << @socket.readpartial(BUFFER_SIZE)
+        @buffer ||= ''.force_encoding('ASCII-8BIT')
+        @buffer << @socket.readpartial(BUFFER_SIZE).force_encoding('ASCII-8BIT')
 
         while data = @buffer.slice!(/(.+)\n/, 1)
           block.call data.chomp if block
