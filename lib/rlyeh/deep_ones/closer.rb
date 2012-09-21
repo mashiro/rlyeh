@@ -1,4 +1,5 @@
 require 'rlyeh/dispatcher'
+require 'rlyeh/connection'
 
 module Rlyeh
   module DeepOnes
@@ -15,7 +16,7 @@ module Rlyeh
       end
 
       on :quit do |env|
-        throw :quit
+        raise Rlyeh::QuitConnection
       end
     end
   end

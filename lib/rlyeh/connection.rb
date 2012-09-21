@@ -7,7 +7,10 @@ require 'rlyeh/callbacks'
 require 'rlyeh/environment'
 
 module Rlyeh
+  class QuitConnection < RuntimeError; end
+
   class Connection
+
     include Rlyeh::Logger
     include Rlyeh::Sender
     include Rlyeh::Worker
@@ -49,11 +52,9 @@ module Rlyeh
 
     def run
       run_callbacks :run do
-        catch :quit do
-          read_each do |data|
-            invoke do
-              process data
-            end
+        read_each do |data|
+          break unless invoke do
+            process data
           end
         end
       end
@@ -86,8 +87,12 @@ module Rlyeh
         catch :halt do
           begin
             @app.call env
+            true
+          rescue Rlyeh::QuitConnection
+            false
           rescue Exception => e
             crash e
+            true
           end
         end
       end
