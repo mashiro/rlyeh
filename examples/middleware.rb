@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
-$LOAD_PATH.unshift 'lib', '../lib'
+$:.unshift 'lib', '../lib'
 require 'rlyeh'
 require 'logger'
 
 class MyMiddleware
-  include Rlyeh::Dispatchable
+  include Rlyeh::Dispatcher
 
   on :privmsg do |env|
     p "Middleware: #{env.message}"
@@ -16,13 +16,13 @@ class MyMiddleware
   end
 
   def call(env)
-    dispatch env
+    super env
     @app.call env
   end
 end
 
 class MyApp < Rlyeh::Base
-  use Rlyeh::DeepOnes::Logger, :level => Logger::DEBUG
+  use Rlyeh::DeepOnes::Logger
   use MyMiddleware
 
   on :privmsg do |env|
