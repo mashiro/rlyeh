@@ -3,6 +3,7 @@ require 'forwardable'
 require 'rlyeh/logger'
 require 'rlyeh/sender'
 require 'rlyeh/worker'
+require 'rlyeh/callbacks'
 require 'rlyeh/environment'
 
 module Rlyeh
@@ -10,6 +11,7 @@ module Rlyeh
     include Rlyeh::Logger
     include Rlyeh::Sender
     include Rlyeh::Worker
+    include Rlyeh::Callbacks
     extend Forwardable
 
     attr_reader :server, :socket
@@ -29,25 +31,29 @@ module Rlyeh
     end
 
     def close
-      @socket.close unless @socket.closed?
+      run_callbacks :close do
+        @socket.close unless @socket.closed?
 
-      if attached?
-        @session.detach self
+        if attached?
+          @session.detach self
 
-        if @session.empty?
-          @session.close
-          @server.sessions.delete @session.id
+          if @session.empty?
+            @session.close
+            @server.sessions.delete @session.id
+          end
         end
-      end
 
-      debug "Connection closed: #{@host}:#{@port}"
+        debug "Connection closed: #{@host}:#{@port}"
+      end
     end
 
     def run
-      catch :quit do
-        read_each do |data|
-          invoke do
-            process data
+      run_callbacks :run do
+        catch :quit do
+          read_each do |data|
+            invoke do
+              process data
+            end
           end
         end
       end
@@ -69,37 +75,45 @@ module Rlyeh
     end
 
     def process(data)
-      env = Rlyeh::Environment.new
-      env.version = Rlyeh::VERSION
-      env.data = data
-      env.server = @server
-      env.connection = self
-      env.settings = @server.app_class.settings
+      run_callbacks :process, data do
+        env = Rlyeh::Environment.new
+        env.version = Rlyeh::VERSION
+        env.data = data
+        env.server = @server
+        env.connection = self
+        env.settings = @server.app_class.settings
 
-      catch :halt do
-        begin
-          @app.call env
-        rescue Exception => e
-          crash e
+        catch :halt do
+          begin
+            @app.call env
+          rescue Exception => e
+            crash e
+          end
         end
       end
     end
 
     def send_data(data, multicast = true)
-      data = data.to_s
-      if multicast && attached?
-        @session.send_data data
-      else
-        @socket.write data
+      run_callbacks :send_data, data, multicast do
+        data = data.to_s
+        if multicast && attached?
+          @session.send_data data
+        else
+          @socket.write data
+        end
       end
     end
 
     def attach(session)
-      @session = session
+      run_callbacks :attach, session do
+        @session = session
+      end
     end
 
     def detach(session)
-      @session = nil
+      run_callbacks :detach, session do
+        @session = nil
+      end
     end
 
     def attached?

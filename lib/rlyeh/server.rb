@@ -1,11 +1,13 @@
 require 'celluloid/io'
 require 'rlyeh/connection'
 require 'rlyeh/logger'
+require 'rlyeh/callbacks'
 
 module Rlyeh
   class Server
     include Celluloid::IO
     include Rlyeh::Logger
+    include Rlyeh::Callbacks
 
     attr_reader :options, :host, :port
     attr_reader :app_class, :sessions, :server
@@ -28,9 +30,11 @@ module Rlyeh
     end
 
     def run
-      loop do
-        socket = @server.accept
-        async.handle_connection socket
+      run_callbacks :run do
+        loop do
+          socket = @server.accept
+          async.handle_connection socket
+        end
       end
     end
 
