@@ -60,7 +60,7 @@ module Rlyeh
     end
 
     def call(env)
-      dispatch env
+      super env
       @app.call env if @app
     end
 

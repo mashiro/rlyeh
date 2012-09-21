@@ -35,12 +35,13 @@ module Rlyeh
       end
     end
 
-    def dispatch(env)
+    def call(env)
       if env.has_event?
         target = env.event
         trigger target, env
       end
     end
+    alias_method :dispatch, :call
 
     def trigger(target, *args, &block)
       callbacks = self.class.callbacks target
