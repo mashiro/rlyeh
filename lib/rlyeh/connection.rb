@@ -75,9 +75,10 @@ module Rlyeh
         env = Rlyeh::Environment.new
         env.version = Rlyeh::VERSION
         env.data = data
+        env.settings = @server.app_class.settings
         env.server = @server
         env.connection = self
-        env.settings = @server.app_class.settings
+        env.session = @session
 
         catch :halt do
           begin
