@@ -17,7 +17,7 @@ module Rlyeh
         end
 
         def call(env)
-          dispatch env
+          super env
 
           if authenticated?
             env.auth = self
