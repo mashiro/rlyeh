@@ -50,6 +50,11 @@ module Rlyeh
     def load_session(session_id)
       @sessions[session_id] ||= Rlyeh::Session.new(session_id)
     end
+
+    def close_session(session_id)
+      session = @sessions.delete(session_id)
+      session.close
+    end
   end
 end
 

@@ -38,12 +38,8 @@ module Rlyeh
         @socket.close unless @socket.closed?
 
         if attached?
-          @session.detach self
-
-          if @session.empty?
-            @session.close
-            @server.sessions.delete @session.id
-          end
+          detached_session = @session.detach self
+          @server.close_session detached_session.id if detached_session.empty?
         end
 
         debug "Connection closed: #{@host}:#{@port}"

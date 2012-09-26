@@ -25,11 +25,13 @@ module Rlyeh
     def attach(connection)
       connection.attach self
       @connections.add connection
+      self
     end
 
     def detach(connection)
       @connections.delete connection
       connection.detach self
+      self
     end
 
     def send_data(data)
