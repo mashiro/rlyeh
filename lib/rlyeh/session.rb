@@ -2,6 +2,7 @@ require 'celluloid'
 require 'set'
 require 'forwardable'
 require 'rlyeh/logger'
+require 'rlyeh/utils'
 
 module Rlyeh
   class Session
@@ -38,6 +39,10 @@ module Rlyeh
       @connections.each do |connection|
         connection.send_data data, false
       end
+    end
+
+    def inspect
+      Rlyeh::Utils.inspect self, :@id
     end
   end
 end

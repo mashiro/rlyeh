@@ -29,6 +29,12 @@ module Rlyeh
           method
         end
       end
+
+      def inspect(obj, *syms)
+        tokens = ["#{obj.class}:%#016x" % obj.object_id]
+        tokens += syms.map { |name| "#{name}=#{instance_variable_get(name).inspect}" }
+        "#<#{tokens.join(' ')}>"
+      end
     end
   end
 end

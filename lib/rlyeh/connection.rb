@@ -5,6 +5,7 @@ require 'rlyeh/sender'
 require 'rlyeh/worker'
 require 'rlyeh/callbacks'
 require 'rlyeh/environment'
+require 'rlyeh/utils'
 
 module Rlyeh
   class QuitConnection < RuntimeError; end
@@ -119,6 +120,10 @@ module Rlyeh
 
     def attached?
       !!@session
+    end
+
+    def inspect
+      Rlyeh::Utils.inspect self, :@host, :@port
     end
   end
 end
