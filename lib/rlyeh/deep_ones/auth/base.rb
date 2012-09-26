@@ -38,7 +38,7 @@ module Rlyeh
         end
 
         def succeeded(env)
-          @authorized = true
+          @authenticated = true
           session = env.server.load_session session_id
           session.attach env.connection
           debug "Authentication succeeded #{env.connection.host}:#{env.connection.port}"
