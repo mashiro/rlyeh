@@ -10,7 +10,6 @@ module Rlyeh
   class QuitConnection < RuntimeError; end
 
   class Connection
-
     include Rlyeh::Logger
     include Rlyeh::Sender
     include Rlyeh::Worker
@@ -65,7 +64,7 @@ module Rlyeh
           block.call data.chomp if block
         end
       end
-    rescue EOFError => e
+    rescue EOFError
       # client disconnected
     rescue Celluloid::Task::TerminatedError
       # kill a running task
