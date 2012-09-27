@@ -12,7 +12,7 @@ module Rlyeh
       end
 
       def use(middleware, *args, &block)
-        @stack << proc { |app| middleware.new(app, *args, &block) }
+        @stack << lambda { |app| middleware.new(app, *args, &block) }
       end
 
       def use!(middleware, *args, &block)
