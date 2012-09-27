@@ -3,7 +3,7 @@ require 'rlyeh/connection'
 
 module Rlyeh
   module DeepOnes
-    class Closer
+    class Quit
       include Rlyeh::Dispatcher
 
       def initialize(app)

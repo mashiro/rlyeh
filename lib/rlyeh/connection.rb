@@ -1,10 +1,11 @@
 require 'celluloid'
+require 'ircp'
 require 'forwardable'
 require 'rlyeh/logger'
-require 'rlyeh/sender'
 require 'rlyeh/worker'
 require 'rlyeh/callbacks'
 require 'rlyeh/environment'
+require 'rlyeh/numeric_reply'
 require 'rlyeh/utils'
 
 module Rlyeh
@@ -12,7 +13,6 @@ module Rlyeh
 
   class Connection
     include Rlyeh::Logger
-    include Rlyeh::Sender
     include Rlyeh::Worker
     include Rlyeh::Callbacks
     extend Forwardable
@@ -104,6 +104,17 @@ module Rlyeh
           @socket.write data
         end
       end
+    end
+
+    def send_message(command, *args)
+      options = Rlyeh::Utils.extract_options! args
+      send_data Ircp::Message.new(*args, options.merge(:command => command))
+    end
+
+    def send_numeric_reply(type, target, *args)
+      options = Rlyeh::Utils.extract_options! args
+      numeric = Rlyeh::NumericReply.to_value type
+      send_data Ircp::Message.new(target, *args, options.merge(:command => numeric))
     end
 
     def attach(session)

@@ -1,3 +1,5 @@
+require 'rlyeh/deep_ones/auth/base'
+
 module Rlyeh
   module DeepOnes
     module Auth

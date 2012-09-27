@@ -10,12 +10,14 @@ module Rlyeh
     include Rlyeh::Logger
     extend Forwardable
 
-    attr_reader :id, :connections
+    attr_reader :id, :connections, :attributes
     def_delegators :@connections, :include?, :empty?
+    def_delegators :@attributes, :[], :[]=
 
     def initialize(id)
       @id = id
       @connections = Set.new
+      @attributes = {}
       debug "Session started: #{@id}"
     end
 

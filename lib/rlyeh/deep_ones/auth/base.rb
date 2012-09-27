@@ -1,4 +1,5 @@
 require 'rlyeh/dispatcher'
+require 'rlyeh/target'
 require 'rlyeh/logger'
 
 module Rlyeh
@@ -8,8 +9,6 @@ module Rlyeh
         include Rlyeh::Dispatcher
         include Rlyeh::Logger
 
-        attr_reader :nick, :pass, :user, :real, :host
-
         def initialize(app, &block)
           @app = app
           @authenticated = false
@@ -18,11 +17,7 @@ module Rlyeh
 
         def call(env)
           super env
-
-          if authenticated?
-            env.auth = self
-            @app.call env if @app
-          end
+          @app.call env if @app && authenticated?
         end
 
         def authenticated?
@@ -33,19 +28,19 @@ module Rlyeh
           raise NotImplementedError
         end
 
-        def session_id
-          @nick
+        def session_id(env)
+          env.user.nick
         end
 
         def succeeded(env)
           @authenticated = true
-          session = env.server.load_session session_id
+          session = env.server.load_session session_id(env)
           session.attach env.connection
           debug "Authentication succeeded #{env.connection.host}:#{env.connection.port}"
         end
 
         def failed(env)
-          env.connection.send_numeric_reply :passwdmismatch, @host, ':Password incorrect'
+          env.connection.send_numeric_reply :passwdmismatch, env.user.host, ':Password incorrect'
           debug "Authentication failed #{env.connection.host}:#{env.connection.port}"
         end
 
@@ -56,30 +51,18 @@ module Rlyeh
           channel_modes = env.settings.available_channel_modes
 
           messages = {
-            :welcome  => "Welcome to the Internet Relay Network #{@nick}!#{@user}@#{@host}",
+            :welcome  => "Welcome to the Internet Relay Network #{env.user.nick}!#{env.user.user}@#{env.user.host}",
             :yourhost => "Your host is #{name}, running version #{version}",
             :created => "This server was created #{Time.now}",
             :myinfo => "#{name} #{version} #{user_modes} #{channel_modes}"
           }
 
           messages.each do |type, message|
-            env.connection.send_numeric_reply type, @nick, ":#{message}", :prefix => {:servername => name}
+            env.connection.send_numeric_reply type, env.user.nick, ":#{message}", :prefix => {:servername => name}
           end
         end
 
-        on :pass do |env|
-          @pass = env.message.params[0]
-        end
-
-        on :nick do |env|
-          @nick = env.message.params[0]
-        end
-
         on :user do |env|
-          @user = env.message.params[0]
-          @real = env.message.params[3]
-          @host = env.connection.host
-
           try env
         end
       end

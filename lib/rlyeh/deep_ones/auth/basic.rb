@@ -1,3 +1,5 @@
+require 'rlyeh/deep_ones/auth/base'
+
 module Rlyeh
   module DeepOnes
     module Auth
@@ -8,7 +10,7 @@ module Rlyeh
         end
 
         def try(env)
-          if @basic == [nick, pass]
+          if @basic == [env.user.nick, env.user.pass]
             succeeded env
             welcome env
           else

@@ -5,8 +5,8 @@ module Rlyeh
       @target = target
     end
 
-    def send_message(command, text, prefix)
-      prefix = {:nick => prefix.to_s} unless prefix.is_a?(Hash)
+    def send_message(command, text, prefix = nil)
+      prefix = {:nick => prefix} unless prefix.is_a?(Hash)
       unless prefix.key? :servername
         prefix[:nick] ||= 'rlyeh'
         prefix[:user] ||= 'rlyeh'

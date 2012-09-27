@@ -1,4 +1,5 @@
 require 'oauth'
+require 'rlyeh/deep_ones/auth/base'
 
 module Rlyeh
   module DeepOnes
@@ -34,20 +35,14 @@ module Rlyeh
 
         def request_phase(env)
           request_token = consumer.get_request_token @request_params
-
-          talk env, 'Access this URL get the PIN and paste it here.'
-          talk env, request_token.authorize_url(@authorize_params)
+          env.sender.privmsg 'Access this URL get the PIN and paste it here.', sender_nick
+          env.sender.privmsg request_token.authorize_url(@authorize_params), sender_nick
         end
 
         protected
 
         def sender_nick
           '$oauth'
-        end
-
-        def talk(env, text)
-          target = Target.new env, @nick
-          target.privmsg text, sender_nick
         end
       end
     end

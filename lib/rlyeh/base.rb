@@ -1,6 +1,7 @@
 require 'rlyeh/dispatcher'
 require 'rlyeh/settings'
-require 'rlyeh/deep_ones/builder'
+require 'rlyeh/deep_ones/user'
+require 'rlyeh/deep_ones/quit'
 require 'rlyeh/deep_ones/parser'
 
 module Rlyeh
@@ -23,9 +24,9 @@ module Rlyeh
         end
       end
 
-      def use(name, *args, &block)
+      def use(middleware, *args, &block)
         @middlewares ||= []
-        @middlewares << [name, args, block]
+        @middlewares << [middleware, args, block]
         @middlewares = @middlewares.uniq
       end
 
@@ -42,13 +43,18 @@ module Rlyeh
       end
 
       def setup_default_middlewares(builder)
-        builder.use! Rlyeh::DeepOnes::Closer
+        builder.use! Rlyeh::DeepOnes::User
+        builder.use! Rlyeh::DeepOnes::Quit
         builder.use! Rlyeh::DeepOnes::Parser
       end
 
       def setup_middlewares(builder)
-        middlewares.each do |name, args, block|
-          builder.use(name, *args, &block)
+        middlewares.each do |middleware, args, block|
+          builder.use(middleware, *args, &block)
+        end
+
+        unless middlewares.any? { |middleware, args, block| middleware.ancestors.include?(Rlyeh::DeepOnes::Auth::Base) }
+          builder.use Rlyeh::DeepOnes::Auth::Null
         end
       end
     end
