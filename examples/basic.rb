@@ -6,6 +6,7 @@ require 'rlyeh'
 class BasicServer < Rlyeh::Base
   use Rlyeh::DeepOnes::Logger
   use Rlyeh::DeepOnes::Auth::Basic, 'dankogai', 'kogaidan'
+  use Rlyeh::DeepOnes::Channels
 
   set :server_name, 'basic-server'
   set :server_version, '1.0.0'

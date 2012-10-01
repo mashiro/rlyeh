@@ -79,7 +79,7 @@ module Rlyeh
         env.settings = @server.app_class.settings
         env.server = @server
         env.connection = self
-        env.session = @session
+        env.session = @session if attached?
 
         catch :halt do
           begin
@@ -108,13 +108,14 @@ module Rlyeh
 
     def send_message(command, *args)
       options = Rlyeh::Utils.extract_options! args
-      send_data Ircp::Message.new(*args, options.merge(:command => command))
+      message = Ircp::Message.new(*args, options.merge(:command => command))
+      send_data adjust_prefix(message)
     end
 
     def send_numeric_reply(type, target, *args)
       options = Rlyeh::Utils.extract_options! args
       numeric = Rlyeh::NumericReply.to_value type
-      send_data Ircp::Message.new(target, *args, options.merge(:command => numeric))
+      send_message numeric, *([target] + args)
     end
 
     def attach(session)
@@ -135,6 +136,17 @@ module Rlyeh
 
     def inspect
       Rlyeh::Utils.inspect self, :@host, :@port
+    end
+
+    private
+
+    def adjust_prefix(message)
+      if prefix = message.prefix
+        prefix.nick ||= 'rlyeh'
+        prefix.user ||= "~#{prefix.nick}"
+        prefix.host ||= @server.app_class.settings.server_name
+      end
+      message
     end
   end
 end
