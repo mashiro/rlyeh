@@ -8,7 +8,6 @@ module Rlyeh
   module DeepOnes
     class Channels
       include Rlyeh::Dispatcher
-      include Rlyeh::Callbacks
 
       class Manager
         include Rlyeh::Callbacks
