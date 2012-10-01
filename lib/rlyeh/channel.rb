@@ -6,9 +6,9 @@ module Rlyeh
 
     def initialize(name, options = {})
       @name = name
-      @key = options.fetch(:key)
-      @mode = options.fetch(:mode)
-      @topic = options.fetch(:topic)
+      @key = options[:key]
+      @mode = options[:mode]
+      @topic = options[:topic]
       @users = []
     end
   end

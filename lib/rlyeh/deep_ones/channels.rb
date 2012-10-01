@@ -23,8 +23,8 @@ module Rlyeh
         def join(env, *args)
           run_callbacks :join, env, *args do
             options = Rlyeh::Utils.extract_options!(args)
-            nick = options.fetch(:nick) { env.me.nick }
-            key = options.fetch(:key)
+            nick = options[:nick] || env.me.nick
+            key = options[:key]
             name = args.shift
 
             env.connection.send_message :JOIN, name, :prefix => {:nick => nick}
@@ -41,7 +41,7 @@ module Rlyeh
         def part(env, *args)
           run_callbacks :part, env, *args do
             options = Rlyeh::Utils.extract_options!(args)
-            nick = options.fetch(:nick) { env.me.nick }
+            nick = options[:nick] || env.me.nick
             name = args.shift
             message = args.shift
 
