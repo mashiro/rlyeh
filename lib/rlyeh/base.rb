@@ -1,6 +1,6 @@
 require 'rlyeh/dispatcher'
 require 'rlyeh/settings'
-require 'rlyeh/deep_ones/user'
+require 'rlyeh/deep_ones/me'
 require 'rlyeh/deep_ones/quit'
 require 'rlyeh/deep_ones/parser'
 
@@ -43,7 +43,7 @@ module Rlyeh
       end
 
       def setup_default_middlewares(builder)
-        builder.use! Rlyeh::DeepOnes::User
+        builder.use! Rlyeh::DeepOnes::Me
         builder.use! Rlyeh::DeepOnes::Quit
         builder.use! Rlyeh::DeepOnes::Parser
       end

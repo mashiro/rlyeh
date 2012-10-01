@@ -10,7 +10,7 @@ module Rlyeh
         end
 
         def try(env)
-          if @basic == [env.user.nick, env.user.pass]
+          if @basic == [env.me.nick, env.me.pass]
             succeeded env
             welcome env
           else

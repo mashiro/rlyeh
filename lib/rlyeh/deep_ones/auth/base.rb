@@ -29,7 +29,7 @@ module Rlyeh
         end
 
         def session_id(env)
-          env.user.nick
+          env.me.nick
         end
 
         def succeeded(env)
@@ -40,7 +40,7 @@ module Rlyeh
         end
 
         def failed(env)
-          env.connection.send_numeric_reply :passwdmismatch, env.user.host, ':Password incorrect'
+          env.connection.send_numeric_reply :passwdmismatch, env.me.host, ':Password incorrect'
           debug "Authentication failed #{env.connection.host}:#{env.connection.port}"
         end
 
@@ -51,14 +51,14 @@ module Rlyeh
           channel_modes = env.settings.available_channel_modes
 
           messages = {
-            :welcome  => "Welcome to the Internet Relay Network #{env.user.nick}!#{env.user.user}@#{env.user.host}",
+            :welcome  => "Welcome to the Rlyeh Internet Relay Network Gateway #{env.me.nick}",
             :yourhost => "Your host is #{name}, running version #{version}",
             :created => "This server was created #{Time.now}",
             :myinfo => "#{name} #{version} #{user_modes} #{channel_modes}"
           }
 
           messages.each do |type, message|
-            env.connection.send_numeric_reply type, env.user.nick, ":#{message}", :prefix => {:servername => name}
+            env.sender.numeric_reply type, ":#{message}"
           end
         end
 

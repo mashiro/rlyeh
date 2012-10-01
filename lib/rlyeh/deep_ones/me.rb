@@ -1,9 +1,10 @@
+require 'ircp'
 require 'rlyeh/dispatcher'
 require 'rlyeh/target'
 
 module Rlyeh
   module DeepOnes
-    class User
+    class Me
       include Rlyeh::Dispatcher
 
       attr_reader :nick, :pass, :user, :real, :host
@@ -14,9 +15,14 @@ module Rlyeh
 
       def call(env)
         super env
-        env.user = self
+        env.me = self
+        env.message.prefix = to_prefix
         env.sender = Rlyeh::Target.new(env, @nick)
         @app.call env if @app
+      end
+
+      def to_prefix
+        Ircp::Prefix.new(:nick => @nick, :user => @user, :host => @host)
       end
 
       on :pass do |env|
