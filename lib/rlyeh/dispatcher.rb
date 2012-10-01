@@ -36,7 +36,7 @@ module Rlyeh
     end
 
     def call(env)
-      if env.has_event?
+      if env.event?
         target = env.event
         trigger target, env
       end

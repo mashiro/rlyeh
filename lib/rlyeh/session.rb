@@ -2,17 +2,18 @@ require 'celluloid'
 require 'set'
 require 'forwardable'
 require 'rlyeh/logger'
+require 'rlyeh/attributes'
 require 'rlyeh/utils'
 
 module Rlyeh
   class Session
     include Celluloid
     include Rlyeh::Logger
+    include Rlyeh::Attributes
     extend Forwardable
 
     attr_reader :id, :connections, :attributes
     def_delegators :@connections, :include?, :empty?
-    def_delegators :@attributes, :[], :[]=
 
     def initialize(id)
       @id = id
@@ -44,7 +45,7 @@ module Rlyeh
     end
 
     def inspect
-      Rlyeh::Utils.inspect self, :@id
+      Rlyeh::Utils.inspect self, :@id, :@attributes
     end
   end
 end

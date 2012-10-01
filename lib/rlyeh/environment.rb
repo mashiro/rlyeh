@@ -1,23 +1,25 @@
+require 'rlyeh/attributes'
+
 module Rlyeh
   class Environment < ::Hash
-    def respond_to?(method_id, include_private = false)
-      super || respond_to_missing?(method_id, include_private)
+    include Rlyeh::Attributes
+
+    def attributes
+      self
     end
 
-    def respond_to_missing?(method_id, include_private)
-      method_name = method_id.to_s
-      return true if method_name =~ /^(.+)=$/
-      return true if method_name =~ /^has_(.+)\?$/
-      return true if self.key? method_name
-      super
-    end
+    def extract(*syms, &block)
+      value = syms.inject(self) do |obj, sym|
+        return if obj.nil?
+        if obj.respond_to?("#{sym}?")
+          obj.__send__(sym) if obj.__send__("#{sym}?")
+        else
+          obj.__send__(sym)
+        end
+      end
 
-    def method_missing(method_id, *args, &block)
-      method_name = method_id.to_s
-      return self[$1] = args.first if method_name =~ /^(.+)=$/
-      return self.has_key? $1 if method_name =~ /^has_(.+)\?$/
-      return self[method_name] if self.key? method_name
-      super
+      block.call value if block && !value.nil?
+      value
     end
   end
 end
