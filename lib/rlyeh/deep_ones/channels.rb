@@ -65,6 +65,7 @@ module Rlyeh
         env.extract :session, :channels do |channels|
           names = (env.message.params[0] || '').split(',')
           keys = (env.message.params[1] || '').split(',')
+
           names.zip(keys).each do |name, key|
             channels.join env, name, :key => key
           end
