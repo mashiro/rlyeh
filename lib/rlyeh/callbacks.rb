@@ -3,11 +3,11 @@ module Rlyeh
     [:before, :around, :after].each do |sym|
       class_eval <<-METHOD
         def #{sym}_callbacks
-          @#{sym}_callbacks ||= Hash.new([])
+          @#{sym}_callbacks ||= Hash.new { |hash, key| hash[key] = [] }
         end
 
         def #{sym}(name, &block)
-        #{sym}_callbacks[name.to_s] << block
+          #{sym}_callbacks[name.to_s] << block
         end
       METHOD
     end
