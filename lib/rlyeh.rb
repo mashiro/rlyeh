@@ -4,6 +4,7 @@ require 'rlyeh/logger'
 require 'rlyeh/dispatcher'
 require 'rlyeh/worker'
 require 'rlyeh/callbacks'
+require 'rlyeh/once'
 
 require 'rlyeh/settings'
 require 'rlyeh/server'
