@@ -1,9 +1,6 @@
 require 'rlyeh/dispatcher'
 require 'rlyeh/settings'
-require 'rlyeh/deep_ones/me'
-require 'rlyeh/deep_ones/quit'
-require 'rlyeh/deep_ones/parser'
-require 'rlyeh/deep_ones/auth'
+require 'rlyeh/deep_ones'
 
 module Rlyeh
   class Base
