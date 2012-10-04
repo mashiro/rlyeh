@@ -54,7 +54,7 @@ module Rlyeh
           channel_modes = env.settings.available_channel_modes
 
           messages = {
-            :welcome  => "Welcome to the Rlyeh Internet Relay Network Gateway #{env.me.nick}",
+            :welcome  => "Welcome to the Rlyeh Internet Relay Network Gateway #{env.me.to_prefix}",
             :yourhost => "Your host is #{name}, running version #{version}",
             :created => "This server was created #{Time.now}",
             :myinfo => "#{name} #{version} #{user_modes} #{channel_modes}"
