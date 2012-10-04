@@ -17,7 +17,10 @@ module Rlyeh
 
         def call(env)
           super env
-          @app.call env if @app && authenticated?
+          if authenticated?
+            env.auth = self
+            @app.call env if @app
+          end
         end
 
         def authenticated?
