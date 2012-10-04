@@ -11,18 +11,26 @@ module Rlyeh
 
       def initialize(app)
         @app = app
+        @registered = false
       end
 
       def call(env)
         super env
-        env.me = self
-        env.message.prefix = to_prefix
-        env.sender = Rlyeh::Target.new(env, @nick)
-        @app.call env if @app
+
+        if registered?
+          env.me = self
+          env.message.prefix = to_prefix
+          env.sender = Rlyeh::Target.new(env, @nick)
+          @app.call env if @app
+        end
       end
 
       def to_prefix
         Ircp::Prefix.new(:nick => @nick, :user => @user, :host => @host)
+      end
+
+      def registered?
+        !!@registered
       end
 
       on :pass do |env|
@@ -37,6 +45,7 @@ module Rlyeh
         @user = env.message.params[0]
         @real = env.message.params[3]
         @host = env.connection.host
+        @registered = true
       end
     end
   end
