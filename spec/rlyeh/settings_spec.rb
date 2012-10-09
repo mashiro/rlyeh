@@ -22,12 +22,14 @@ describe Rlyeh::Settings do
       include Rlyeh::Settings
       set :logging, false
       set :default_encoding, 'utf-8'
+      set :database, :sqlite3, :db => 'test.db'
     end
     subject { Test.settings }
     
     context 'getter' do
       its(:logging) { should eq false }
       its(:default_encoding) { should eq 'utf-8' }
+      its(:database) { should eq [:sqlite3, {:db => 'test.db'}] }
     end
     
     context 'setter' do
@@ -45,10 +47,10 @@ describe Rlyeh::Settings do
     end
     
     context 'multi set' do
-      before { Test.set :foo => 1, :bar => 2, :buzz => 'zzz' }
+      before { Test.set :foo => 1, :bar => 2, :buzz => {:hoge => 1, :fuga => 2} }
       its(:foo) { should eq 1 }
       its(:bar) { should eq 2 }
-      its(:buzz) { should eq 'zzz' }
+      its(:buzz) { should eq ({:hoge => 1, :fuga => 2}) }
     end
   end
 end
