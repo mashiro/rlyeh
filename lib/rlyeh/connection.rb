@@ -76,7 +76,7 @@ module Rlyeh
         env = Rlyeh::Environment.new
         env.version = Rlyeh::VERSION
         env.data = data
-        env.settings = @server.app_class.settings
+        env.settings = @server.settings
         env.server = @server
         env.connection = self
         env.session = @session if attached?
@@ -144,7 +144,7 @@ module Rlyeh
       if prefix = message.prefix
         prefix.nick ||= 'rlyeh'
         prefix.user ||= "~#{prefix.nick}"
-        prefix.host ||= @server.app_class.settings.server_name
+        prefix.host ||= @server.settings.server_name
       end
       message
     end

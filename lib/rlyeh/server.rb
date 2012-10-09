@@ -55,6 +55,10 @@ module Rlyeh
       session = @sessions.delete(session_id)
       session.close
     end
+
+    def settings
+      @app_class.settings
+    end
   end
 end
 
