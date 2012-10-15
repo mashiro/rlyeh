@@ -11,6 +11,7 @@ module Rlyeh
     set :server_version, Rlyeh::VERSION
     set :available_user_modes, ''
     set :available_channel_modes, ''
+    set :store, :null
 
     class << self
       def middlewares
@@ -41,6 +42,7 @@ module Rlyeh
       end
 
       def setup_default_middlewares(builder)
+        builder.use! Rlyeh::DeepOnes::Store
         builder.use! Rlyeh::DeepOnes::Me
         builder.use! Rlyeh::DeepOnes::Quit
         builder.use! Rlyeh::DeepOnes::Parser

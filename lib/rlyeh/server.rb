@@ -2,6 +2,7 @@ require 'celluloid/io'
 require 'rlyeh/connection'
 require 'rlyeh/logger'
 require 'rlyeh/callbacks'
+require 'rlyeh/stores'
 
 module Rlyeh
   class Server
@@ -53,7 +54,7 @@ module Rlyeh
 
     def close_session(session_id)
       session = @sessions.delete(session_id)
-      session.close
+      session.close if session
     end
 
     def settings

@@ -31,14 +31,8 @@ module Rlyeh
           raise NotImplementedError
         end
 
-        def session_id(env)
-          env.me.nick
-        end
-
         def succeeded(env)
           @authenticated = true
-          session = env.server.load_session session_id(env)
-          session.attach env.connection
           debug "Authentication succeeded #{env.connection.host}:#{env.connection.port}"
         end
 

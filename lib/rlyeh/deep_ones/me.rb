@@ -45,7 +45,12 @@ module Rlyeh
         @user = env.message.params[0]
         @real = env.message.params[3]
         @host = env.connection.host
-        @registered = true
+
+        unless registered?
+          session = env.server.load_session @nick
+          session.attach env.connection
+          @registered = true
+        end
       end
     end
   end
