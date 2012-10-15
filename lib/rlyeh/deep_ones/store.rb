@@ -18,7 +18,6 @@ module Rlyeh
         unless @store
           type, options = env.settings.store
           @store = Rlyeh::Stores.guess(type).new(env.me, options || {})
-          p @store
         end
         @store
       end
