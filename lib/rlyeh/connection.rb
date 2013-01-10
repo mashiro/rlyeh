@@ -2,7 +2,6 @@ require 'celluloid'
 require 'ircp'
 require 'forwardable'
 require 'rlyeh/logger'
-require 'rlyeh/worker'
 require 'rlyeh/callbacks'
 require 'rlyeh/environment'
 require 'rlyeh/numeric_reply'
@@ -13,7 +12,6 @@ module Rlyeh
 
   class Connection
     include Rlyeh::Logger
-    include Rlyeh::Worker
     include Rlyeh::Callbacks
     extend Forwardable
 
@@ -49,9 +47,7 @@ module Rlyeh
     def run
       run_callbacks :run do
         read_each do |data|
-          break unless invoke do
-            process data
-          end
+          break unless process data
         end
       end
     end
