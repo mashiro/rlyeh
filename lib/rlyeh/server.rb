@@ -7,6 +7,8 @@ require 'rlyeh/stores'
 module Rlyeh
   class Server
     include Celluloid::IO
+    task_class Celluloid::TaskThread unless RUBY_VERSION >= '2.0.0'
+
     include Rlyeh::Logger
     include Rlyeh::Callbacks
 
