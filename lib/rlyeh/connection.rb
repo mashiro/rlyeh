@@ -69,6 +69,8 @@ module Rlyeh
 
     def process(data)
       run_callbacks :process, data do
+        debug ">> #{data.strip}"
+
         env = Rlyeh::Environment.new
         env.version = Rlyeh::VERSION
         env.data = data
@@ -91,13 +93,19 @@ module Rlyeh
       end
     end
 
+    def send_data_impl(data)
+      @socket.write data
+    end
+
     def send_data(data, multicast = true)
       run_callbacks :send_data, data, multicast do
         data = data.to_s
+        debug "<< #{data.strip}"
+
         if multicast && attached?
           @session.send_data data
         else
-          @socket.write data
+          send_data_impl data
         end
       end
     end

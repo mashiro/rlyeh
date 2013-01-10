@@ -40,7 +40,7 @@ module Rlyeh
 
     def send_data(data)
       @connections.each do |connection|
-        connection.send_data data, false
+        connection.send_data_impl data
       end
     end
 
